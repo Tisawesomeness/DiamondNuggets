@@ -3,6 +3,10 @@
 # unless the player renames them to the new name
 item-name: "Diamond Nugget"
 
+# The amount of nuggets needed to craft a diamond
+# Must be between 1-9, 8 or 9 is recommended
+nuggets-to-diamond: 9
+
 # Whether the recipes unlock on join (or plugin enable) regardless of what items the player has
 # If false, players will unlock the recipes when picking up a diamond or diamond nugget
 unlock-on-join: true
@@ -10,8 +14,7 @@ unlock-on-join: true
 # Whether to stop players from trying to rename diamond nuggets
 # Due to Minecraft recipe limitations, the *exact* item NBT must match for a custom recipe to succeed,
 # so renaming the item will cause it to not work anymore in recipes
-# Players can still rename regular golden nuggets,
-# but renaming golden nuggets to diamond nuggets will not work in recipes
+# Players can still rename regular golden nuggets, but these cannot be used to craft diamonds
 prevent-renames: true
 
 # The message to display when a player is stopped from renaming diamond nuggets

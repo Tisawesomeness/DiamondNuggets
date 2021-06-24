@@ -10,6 +10,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class DiamondNuggets extends JavaPlugin {
 
     private static DiamondNuggets plugin;
+
+    public final NamespacedKey toNuggetKey = new NamespacedKey(this, "nugget");
+    public final NamespacedKey toDiamondKey = new NamespacedKey(this, "diamond");
+    public final ItemStack nugget = initNugget();
+
     /**
      * @return This plugin instance
      */
@@ -17,25 +22,32 @@ public class DiamondNuggets extends JavaPlugin {
         return plugin;
     }
 
-    public final NamespacedKey toNuggetKey = new NamespacedKey(this, "nugget");
-    public final NamespacedKey toDiamondKey = new NamespacedKey(this, "diamond");
-    public final ItemStack nugget = initNugget();
-
     @Override
     public void onEnable() {
         plugin = this;
         saveDefaultConfig();
 
-        addToNuggetRecipe();
-        addToDiamondRecipe();
+        // Don't add recipe if amount of nuggets is invalid
+        int ingredientCount = getConfig().getInt("nuggets-to-diamond");
+        if (1 <= ingredientCount && ingredientCount <= 9) {
 
-        // In case plugin is reloaded while server is running, give recipes to all online players
-        for (Player p : getServer().getOnlinePlayers()) {
-            if (getConfig().getBoolean("unlock-on-join") || shouldUnlockRecipes(p.getInventory())) {
-                unlockRecipes(p);
+            addToNuggetRecipe(ingredientCount);
+            addToDiamondRecipe(ingredientCount);
+
+            // In case plugin is reloaded while server is running, give recipes to all online players
+            for (Player p : getServer().getOnlinePlayers()) {
+                if (getConfig().getBoolean("unlock-on-join") || shouldUnlockRecipes(p.getInventory())) {
+                    unlockRecipes(p);
+                }
             }
+
+        } else {
+            getServer().getConsoleSender().sendMessage(
+                    "Amount of nuggets to craft a diamond must be between 1-9 but was " + ingredientCount);
+            return;
         }
 
+        // Prevent renaming even if recipes are temporarily invalid
         getServer().getPluginManager().registerEvents(new InventoryListener(), this);
     }
 
@@ -52,25 +64,36 @@ public class DiamondNuggets extends JavaPlugin {
     }
 
     // Known bug: recipe book doesn't autofill custom items
-    private void addToDiamondRecipe() {
-        ShapedRecipe toDiamondRecipe = new ShapedRecipe(toDiamondKey, new ItemStack(Material.DIAMOND));
-        toDiamondRecipe.shape("###", "###", "###");
-        toDiamondRecipe.setIngredient('#', new RecipeChoice.ExactChoice(nugget));
-        getServer().addRecipe(toDiamondRecipe);
+    // ingredientCount assumed 1-9
+    private void addToDiamondRecipe(int ingredientCount) {
+        getServer().addRecipe(getToDiamondRecipe(ingredientCount));
     }
-    private void addToNuggetRecipe() {
+    private Recipe getToDiamondRecipe(int ingredientCount) {
+        if (ingredientCount == 9) {
+            ShapedRecipe toDiamondRecipe = new ShapedRecipe(toDiamondKey, new ItemStack(Material.DIAMOND));
+            toDiamondRecipe.shape("###", "###", "###");
+            toDiamondRecipe.setIngredient('#', new RecipeChoice.ExactChoice(nugget));
+            return toDiamondRecipe;
+        }
+        ShapelessRecipe toDiamondRecipe = new ShapelessRecipe(toDiamondKey, new ItemStack(Material.DIAMOND));
+        RecipeChoice choice = new RecipeChoice.ExactChoice(nugget);
+        for (int i = 0; i < ingredientCount; i++) {
+            toDiamondRecipe.addIngredient(choice);
+        }
+        return toDiamondRecipe;
+    }
+
+    // ingredientCount assumed 1-64
+    private void addToNuggetRecipe(int ingredientCount) {
         ItemStack nuggets = nugget.clone();
-        nuggets.setAmount(9);
+        nuggets.setAmount(ingredientCount);
         ShapelessRecipe toNuggetRecipe = new ShapelessRecipe(toNuggetKey, nuggets);
         toNuggetRecipe.addIngredient(1, Material.DIAMOND);
         getServer().addRecipe(toNuggetRecipe);
     }
 
     @Override
-    public void onDisable() {
-        getServer().removeRecipe(toNuggetKey);
-        getServer().removeRecipe(toDiamondKey);
-    }
+    public void onDisable() {}
 
     /**
      * @param inv The player's inventory

@@ -10,13 +10,10 @@ sourceCompatibility = 1.16
 
 repositories {
     mavenCentral()
-    mavenLocal()
-     maven { url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
 }
 
 dependencies {
     compileOnly spigot('1.17')
-    compileOnly 'org.spigotmc:spigot:1.17-R0.1-SNAPSHOT'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 }
