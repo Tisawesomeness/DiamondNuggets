@@ -1,3 +1,5 @@
+package com.tisawesomeness.diamondnuggets;
+
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
@@ -9,22 +11,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class DiamondNuggets extends JavaPlugin {
 
-    private static DiamondNuggets plugin;
-
     public final NamespacedKey toNuggetKey = new NamespacedKey(this, "nugget");
     public final NamespacedKey toDiamondKey = new NamespacedKey(this, "diamond");
     public final ItemStack nugget = initNugget();
 
-    /**
-     * @return This plugin instance
-     */
-    public static DiamondNuggets self() {
-        return plugin;
-    }
-
     @Override
     public void onEnable() {
-        plugin = this;
         saveDefaultConfig();
 
         // Don't add recipe if amount of nuggets is invalid
@@ -48,7 +40,7 @@ public class DiamondNuggets extends JavaPlugin {
         }
 
         // Prevent renaming even if recipes are temporarily invalid
-        getServer().getPluginManager().registerEvents(new InventoryListener(), this);
+        getServer().getPluginManager().registerEvents(new InventoryListener(this), this);
     }
 
     private ItemStack initNugget() {

@@ -28,4 +28,5 @@ spigot {
     authors = ['Tis_awesomeness']
     apiVersion = '1.17'
     load = STARTUP
+    main = 'com.tisawesomeness.diamondnuggets.DiamondNuggets'
 }

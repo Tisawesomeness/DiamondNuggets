@@ -1,3 +1,5 @@
+package com.tisawesomeness.diamondnuggets;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
@@ -17,21 +19,25 @@ public class InventoryListener implements Listener {
             InventoryAction.PLACE_ONE, InventoryAction.PLACE_SOME, InventoryAction.PLACE_ALL,
             InventoryAction.SWAP_WITH_CURSOR
     );
-    private static final DiamondNuggets MAIN = DiamondNuggets.self();
+
+    private final DiamondNuggets plugin;
+    public InventoryListener(DiamondNuggets plugin) {
+        this.plugin = plugin;
+    }
 
     // Events cover all detectable cases where an item is added to a player's inventory
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
-        if (MAIN.getConfig().getBoolean("unlock-on-join") ||
-                MAIN.shouldUnlockRecipes(e.getPlayer().getInventory())) {
-            MAIN.unlockRecipes(e.getPlayer());
+        if (plugin.getConfig().getBoolean("unlock-on-join") ||
+                plugin.shouldUnlockRecipes(e.getPlayer().getInventory())) {
+            plugin.unlockRecipes(e.getPlayer());
         }
     }
     @EventHandler
     public void onInventoryClick(InventoryClickEvent e) {
-        if (MAIN.getConfig().getBoolean("prevent-renames") && shouldCancel(e)) {
+        if (plugin.getConfig().getBoolean("prevent-renames") && shouldCancel(e)) {
             e.setCancelled(true);
-            e.getWhoClicked().sendMessage(ChatColor.RED + MAIN.getConfig().getString("rename-disabled-message"));
+            e.getWhoClicked().sendMessage(ChatColor.RED + plugin.getConfig().getString("rename-disabled-message"));
         } else {
             onInventoryChange(e.getWhoClicked());
         }
@@ -41,20 +47,20 @@ public class InventoryListener implements Listener {
         onInventoryChange(e.getWhoClicked());
     }
     private void onInventoryChange(HumanEntity player) {
-        if (MAIN.shouldUnlockRecipes(player.getInventory())) {
-            MAIN.unlockRecipes(player);
+        if (plugin.shouldUnlockRecipes(player.getInventory())) {
+            plugin.unlockRecipes(player);
         }
     }
     @EventHandler
     public void onPickupItem(EntityPickupItemEvent e) {
         ItemStack item = e.getItem().getItemStack();
         if (e.getEntityType() == EntityType.PLAYER &&
-                (item.getType() == Material.DIAMOND || item.isSimilar(MAIN.nugget))) {
-            MAIN.unlockRecipes((HumanEntity) e.getEntity());
+                (item.getType() == Material.DIAMOND || item.isSimilar(plugin.nugget))) {
+            plugin.unlockRecipes((HumanEntity) e.getEntity());
         }
     }
 
-    private static boolean shouldCancel(InventoryClickEvent e) {
+    private boolean shouldCancel(InventoryClickEvent e) {
         ItemStack placedItem = null;
         if (e.getInventory().getType() == InventoryType.ANVIL && e.getSlotType() == InventoryType.SlotType.CRAFTING) {
             placedItem = getPlacedItem(e);
@@ -63,7 +69,7 @@ public class InventoryListener implements Listener {
         if (wasShiftedToAnvil(e)) {
             placedItem = e.getCurrentItem();
         }
-        return placedItem != null && placedItem.isSimilar(MAIN.nugget);
+        return placedItem != null && placedItem.isSimilar(plugin.nugget);
     }
     // returns null if no item was placed
     private static ItemStack getPlacedItem(InventoryClickEvent e) {
