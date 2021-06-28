@@ -1,5 +1,6 @@
 package com.tisawesomeness.diamondnuggets;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
@@ -13,11 +14,16 @@ public class DiamondNuggets extends JavaPlugin {
 
     public final NamespacedKey toNuggetKey = new NamespacedKey(this, "nugget");
     public final NamespacedKey toDiamondKey = new NamespacedKey(this, "diamond");
-    public final ItemStack nugget = initNugget();
+    public ItemStack nugget = null;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
+
+        nugget = initNugget();
+        if (nugget == null) {
+            return;
+        }
 
         // Don't add recipe if amount of nuggets is invalid
         int ingredientCount = getConfig().getInt("nuggets-to-diamond");
@@ -34,8 +40,7 @@ public class DiamondNuggets extends JavaPlugin {
             }
 
         } else {
-            getServer().getConsoleSender().sendMessage(
-                    "Amount of nuggets to craft a diamond must be between 1-9 but was " + ingredientCount);
+            err("Amount of nuggets to craft a diamond must be between 1-9 but was " + ingredientCount + "!");
             return;
         }
 
@@ -44,7 +49,23 @@ public class DiamondNuggets extends JavaPlugin {
     }
 
     private ItemStack initNugget() {
-        ItemStack nugget = new ItemStack(Material.GOLD_NUGGET);
+        String nuggetStr = getConfig().getString("item-material");
+        if (nuggetStr == null) {
+            err("The item material was missing from the config!");
+            return null;
+        }
+        Material nuggetMat = Material.matchMaterial(nuggetStr);
+        if (nuggetMat == null) {
+            err(nuggetStr + " is not a valid material!");
+            return null;
+        }
+        // Air cannot be crafted
+        if (nuggetMat.isAir()) {
+            err("The item material cannot be air!");
+            return null;
+        }
+
+        ItemStack nugget = new ItemStack(nuggetMat);
         nugget.addUnsafeEnchantment(Enchantment.LOOT_BONUS_BLOCKS, Enchantment.LOOT_BONUS_BLOCKS.getMaxLevel());
         ItemMeta meta = nugget.getItemMeta();
         assert meta != null;
@@ -101,6 +122,10 @@ public class DiamondNuggets extends JavaPlugin {
     public void unlockRecipes(HumanEntity player) {
         player.discoverRecipe(toNuggetKey);
         player.discoverRecipe(toDiamondKey);
+    }
+
+    private void err(String msg) {
+        getServer().getConsoleSender().sendMessage(ChatColor.RED + msg);
     }
 
 }

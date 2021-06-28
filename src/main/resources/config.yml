@@ -3,6 +3,12 @@
 # unless the player renames them to the new name
 item-name: "Diamond Nugget"
 
+# The nugget material used to represent diamond nuggets, cannot be air
+# Nugget items cannot be placed or used by accident
+# See the link below for a list
+# https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
+item-material: GOLD_NUGGET
+
 # The amount of nuggets needed to craft a diamond
 # Must be between 1-9, 8 or 9 is recommended
 nuggets-to-diamond: 9

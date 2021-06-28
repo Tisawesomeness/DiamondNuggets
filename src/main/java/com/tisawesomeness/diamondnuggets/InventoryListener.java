@@ -4,10 +4,12 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.*;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -96,6 +98,15 @@ public class InventoryListener implements Listener {
         return item.getAmount() < item.getMaxStackSize() &&
                 e.getCurrentItem() != null &&
                 e.getCurrentItem().isSimilar(item);
+    }
+
+    // Prevents accidental uses in case nugget is defined as a block or consumable
+    @EventHandler
+    public void onPlayerInteract(PlayerInteractEvent e) {
+        ItemStack item = e.getItem();
+        if (item != null && item.isSimilar(plugin.nugget)) {
+            e.setUseItemInHand(Event.Result.DENY);
+        }
     }
 
 }
