@@ -7,6 +7,6 @@ Do you use diamonds as currency, but wish you could sell something for less than
 
 This simple plugin adds two recipes to aid players creating item shops. Players unlock the recipes by obtaining a diamond or diamond nugget, or when they join the server if set in the config.
 
-You can customize the amount of nuggets crafted from a diamond, the item name (so you can name it "Diamond Shards" or something crazier if you want), and whether to prevent renames.
+You can customize the amount of nuggets crafted from a diamond, the item name and material (so you can change diamond nuggets to amethyst crystals named "Diamond Shards" if you want), and whether to prevent renames.
 
-The custom resource pack shown above is available [here](https://github.com/Tisawesomeness/DiamondNuggets/blob/master/assets/DiamondShards.zip?raw=true) (requires Optifine). If you don't use the resource pack, diamond nuggets will show up as enchanted golden nuggets instead.
+The plugin will generate the resource pack used in the above screenshots and put it in the plugin folder. If players do not have the resource pack, diamond nuggets will appear as golden nuggets (or a different item if changed in the config).

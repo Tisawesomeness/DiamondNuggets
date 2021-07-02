@@ -1,6 +1,5 @@
 package com.tisawesomeness.diamondnuggets;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
@@ -9,6 +8,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 public class DiamondNuggets extends JavaPlugin {
 
@@ -20,9 +23,31 @@ public class DiamondNuggets extends JavaPlugin {
     public void onEnable() {
         saveDefaultConfig();
 
-        nugget = initNugget();
-        if (nugget == null) {
+        String itemName = getConfig().getString("item-name");
+        if (itemName == null || itemName.isEmpty()) {
+            err("Item name cannot be empty!");
             return;
+        }
+        if (itemName.length() > 50) {
+            err("Item name must be 50 characters or less but was " + itemName.length() + " characters!");
+            return;
+        }
+
+        Material nuggetMat = getNuggetMaterial();
+        if (nuggetMat == null) {
+            return;
+        }
+        nugget = initNugget(nuggetMat);
+
+        try {
+            PackCreator packCreator = new PackCreator(getDataFolder().toPath());
+            if (packCreator.createPackIfNeeded(itemName, nuggetMat)) {
+                log("Resource pack created");
+            } else {
+                log("Resource pack already exists");
+            }
+        } catch (IOException e) {
+            err(e);
         }
 
         // Don't add recipe if amount of nuggets is invalid
@@ -41,14 +66,13 @@ public class DiamondNuggets extends JavaPlugin {
 
         } else {
             err("Amount of nuggets to craft a diamond must be between 1-9 but was " + ingredientCount + "!");
-            return;
         }
 
         // Prevent renaming even if recipes are temporarily invalid
         getServer().getPluginManager().registerEvents(new InventoryListener(this), this);
     }
 
-    private ItemStack initNugget() {
+    private Material getNuggetMaterial() {
         String nuggetStr = getConfig().getString("item-material");
         if (nuggetStr == null) {
             err("The item material was missing from the config!");
@@ -64,7 +88,9 @@ public class DiamondNuggets extends JavaPlugin {
             err("The item material cannot be air!");
             return null;
         }
-
+        return nuggetMat;
+    }
+    private ItemStack initNugget(Material nuggetMat) {
         ItemStack nugget = new ItemStack(nuggetMat);
         nugget.addUnsafeEnchantment(Enchantment.LOOT_BONUS_BLOCKS, Enchantment.LOOT_BONUS_BLOCKS.getMaxLevel());
         ItemMeta meta = nugget.getItemMeta();
@@ -124,8 +150,18 @@ public class DiamondNuggets extends JavaPlugin {
         player.discoverRecipe(toDiamondKey);
     }
 
-    private void err(String msg) {
-        getServer().getConsoleSender().sendMessage(ChatColor.RED + msg);
+    public void log(String msg) {
+        getLogger().info(msg);
+    }
+    public void err(String msg) {
+        getLogger().warning(msg);
+    }
+    public void err(Throwable e) {
+        StringWriter sw = new StringWriter();
+        e.printStackTrace(new PrintWriter(sw));
+        for (String line : sw.toString().split("\n")) {
+            getLogger().severe(line);
+        }
     }
 
 }

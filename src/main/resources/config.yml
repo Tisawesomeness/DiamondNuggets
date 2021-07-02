@@ -1,4 +1,4 @@
-# The name of the diamond nugget item
+# The name of the diamond nugget item, must be 1-50 characters
 # Changing the name will make existing nuggets unable to be combined back into a diamond
 # unless the player renames them to the new name
 item-name: "Diamond Nugget"
