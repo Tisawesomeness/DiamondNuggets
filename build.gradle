@@ -1,21 +1,21 @@
 plugins {
     id 'java'
-    id 'kr.entree.spigradle' version '2.2.4'
+    id 'kr.entree.spigradle' version '2.3.4'
 }
 
 group 'com.tisawesomeness.diamondnuggets'
 version '0.0.2'
 
-sourceCompatibility = 1.16
+sourceCompatibility = 1.17
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    compileOnly spigot('1.17')
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    compileOnly spigot('1.18.1')
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
 }
 
 test {
@@ -26,7 +26,6 @@ runSpigot.dependsOn prepareSpigotPlugins
 
 spigot {
     authors = ['Tis_awesomeness']
-    apiVersion = '1.17'
-    load = STARTUP
+    apiVersion = '1.18'
     main = 'com.tisawesomeness.diamondnuggets.DiamondNuggets'
 }
