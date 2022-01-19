@@ -40,7 +40,7 @@ public class DiamondNuggets extends JavaPlugin {
         nugget = initNugget(nuggetMat);
 
         try {
-            PackCreator packCreator = new PackCreator(getDataFolder().toPath());
+            PackCreator packCreator = new PackCreator(getDataFolder().toPath(), getDescription().getVersion());
             if (packCreator.createPackIfNeeded(itemName, nuggetMat)) {
                 log("Resource pack created");
             } else {

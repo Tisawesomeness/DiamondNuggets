@@ -5,6 +5,7 @@ import org.bukkit.Material;
 import java.io.*;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Properties;
 import java.util.regex.Pattern;
@@ -18,8 +19,10 @@ public class PackCreator {
             "^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$", Pattern.CASE_INSENSITIVE);
 
     private final Path dataPath;
-    public PackCreator(Path dataPath) {
+    private final String pluginVersion;
+    public PackCreator(Path dataPath, String pluginVersion) {
         this.dataPath = dataPath;
+        this.pluginVersion = pluginVersion;
     }
 
     public boolean createPackIfNeeded(String itemName, Material itemMaterial) throws IOException {
@@ -40,22 +43,38 @@ public class PackCreator {
         if (!packDataPath.toFile().exists()) {
             return true;
         }
+
         try (InputStream is = Files.newInputStream(packDataPath)) {
             Properties packProp = new Properties();
             packProp.load(is);
+
             String storedItemName = packProp.getProperty("item-name");
-            if (!storedItemName.equals(itemName)) {
-                Files.delete(getZipPath(dataPath, storedItemName));
+            if (storedItemName == null) {
                 return true;
             }
-            Material storedItemMaterial = Material.matchMaterial(packProp.getProperty("item-material"));
-            if (storedItemMaterial != itemMaterial) {
-                Files.delete(getZipPath(dataPath, storedItemName));
+            Path packPath = getZipPath(dataPath, storedItemName);
+            if (!itemName.equals(storedItemName)) {
+                Files.delete(packPath);
                 return true;
             }
-            return false;
+            String storedItemMaterial = packProp.getProperty("item-material");
+            if (storedItemMaterial == null || Material.matchMaterial(storedItemMaterial) != itemMaterial) {
+                Files.delete(packPath);
+                return true;
+            }
+            String storedPluginVersion = packProp.getProperty("plugin-version");
+            if (!pluginVersion.equals(storedPluginVersion)) {
+                Files.delete(packPath);
+                return true;
+            }
+
+            return !packPath.toFile().exists();
+
+        } catch (NoSuchFileException ignore) {
+            return true; // If the old pack isn't found, we still need to create the new one
         }
     }
+
     // Assumes itemName is 1-50 chars
     private void createPack(Path packDataPath, String itemName, Material itemMaterial) throws IOException {
         // Using temp folder to create pack directory structure before zipping
@@ -91,8 +110,9 @@ public class PackCreator {
         Properties packProp = new Properties();
         packProp.setProperty("item-name", itemName);
         packProp.setProperty("item-material", materialName);
+        packProp.setProperty("plugin-version", pluginVersion);
         try (OutputStream os = Files.newOutputStream(packDataPath)) {
-            packProp.store(os, " Do not modify");
+            packProp.store(os, "Do not modify");
         }
     }
 
