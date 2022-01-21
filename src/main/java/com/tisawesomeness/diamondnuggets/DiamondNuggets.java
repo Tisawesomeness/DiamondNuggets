@@ -1,5 +1,9 @@
 package com.tisawesomeness.diamondnuggets;
 
+import com.tisawesomeness.diamondnuggets.listen.RenameListener;
+import com.tisawesomeness.diamondnuggets.listen.UnlockListener;
+import com.tisawesomeness.diamondnuggets.listen.UseListener;
+
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
@@ -7,6 +11,7 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.IOException;
@@ -69,7 +74,12 @@ public class DiamondNuggets extends JavaPlugin {
         }
 
         // Prevent renaming even if recipes are temporarily invalid
-        getServer().getPluginManager().registerEvents(new InventoryListener(this), this);
+        PluginManager man = getServer().getPluginManager();
+        man.registerEvents(new UseListener(this), this);
+        man.registerEvents(new UnlockListener(this), this);
+        if (getConfig().getBoolean("prevent-renames", true)) {
+            man.registerEvents(new RenameListener(this), this);
+        }
     }
 
     private Material getNuggetMaterial() {

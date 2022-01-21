@@ -1,26 +1,24 @@
-package com.tisawesomeness.diamondnuggets;
+package com.tisawesomeness.diamondnuggets.listen;
+
+import com.tisawesomeness.diamondnuggets.DiamondNuggets;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.HumanEntity;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.EnumSet;
 
-public class InventoryListener implements Listener {
+public class RenameListener implements Listener {
 
     private static final EnumSet<InventoryAction> PLACE_ACTIONS = EnumSet.of(
             InventoryAction.PLACE_ONE, InventoryAction.PLACE_SOME, InventoryAction.PLACE_ALL,
@@ -28,34 +26,15 @@ public class InventoryListener implements Listener {
     );
 
     private final DiamondNuggets plugin;
-    public InventoryListener(DiamondNuggets plugin) {
+    public RenameListener(DiamondNuggets plugin) {
         this.plugin = plugin;
     }
 
-    // Events cover all detectable cases where an item is added to a player's inventory
-    @EventHandler
-    public void onJoin(PlayerJoinEvent e) {
-        if (plugin.getConfig().getBoolean("unlock-on-join") ||
-                plugin.shouldUnlockRecipes(e.getPlayer().getInventory())) {
-            plugin.unlockRecipes(e.getPlayer());
-        }
-    }
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInventoryClick(InventoryClickEvent e) {
-        if (plugin.getConfig().getBoolean("prevent-renames") && isTryingToRename(e)) {
+        if (isTryingToRename(e)) {
             e.setCancelled(true);
             e.getWhoClicked().sendMessage(ChatColor.RED + plugin.getConfig().getString("rename-disabled-message"));
-        } else {
-            onInventoryChange(e.getWhoClicked());
-        }
-    }
-    @EventHandler
-    public void onInventoryDrag(InventoryDragEvent e) {
-        onInventoryChange(e.getWhoClicked());
-    }
-    private void onInventoryChange(HumanEntity player) {
-        if (plugin.shouldUnlockRecipes(player.getInventory())) {
-            plugin.unlockRecipes(player);
         }
     }
     @EventHandler
@@ -76,7 +55,7 @@ public class InventoryListener implements Listener {
                 AnvilInventory ai = (AnvilInventory) e.getInventory();
                 placedItem = ai.getItem(0);
             }
-        // Shift click requires special case
+            // Shift click requires special case
         } else if (wasShiftedToAnvil(e)) {
             placedItem = e.getCurrentItem();
         }
@@ -107,15 +86,6 @@ public class InventoryListener implements Listener {
         return item.getAmount() < item.getMaxStackSize() &&
                 e.getCurrentItem() != null &&
                 e.getCurrentItem().isSimilar(item);
-    }
-
-    // Prevents accidental uses in case nugget is defined as a block or consumable
-    @EventHandler
-    public void onPlayerInteract(PlayerInteractEvent e) {
-        ItemStack item = e.getItem();
-        if (item != null && item.isSimilar(plugin.nugget)) {
-            e.setUseItemInHand(Event.Result.DENY);
-        }
     }
 
 }
