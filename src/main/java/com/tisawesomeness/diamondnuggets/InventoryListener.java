@@ -6,11 +6,16 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPickupItemEvent;
-import org.bukkit.event.inventory.*;
+import org.bukkit.event.inventory.InventoryAction;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.EnumSet;
@@ -35,9 +40,9 @@ public class InventoryListener implements Listener {
             plugin.unlockRecipes(e.getPlayer());
         }
     }
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onInventoryClick(InventoryClickEvent e) {
-        if (plugin.getConfig().getBoolean("prevent-renames") && shouldCancel(e)) {
+        if (plugin.getConfig().getBoolean("prevent-renames") && isTryingToRename(e)) {
             e.setCancelled(true);
             e.getWhoClicked().sendMessage(ChatColor.RED + plugin.getConfig().getString("rename-disabled-message"));
         } else {
@@ -62,13 +67,17 @@ public class InventoryListener implements Listener {
         }
     }
 
-    private boolean shouldCancel(InventoryClickEvent e) {
+    private boolean isTryingToRename(InventoryClickEvent e) {
         ItemStack placedItem = null;
-        if (e.getInventory().getType() == InventoryType.ANVIL && e.getSlotType() == InventoryType.SlotType.CRAFTING) {
-            placedItem = getPlacedItem(e);
-        }
+        if (e.getInventory().getType() == InventoryType.ANVIL) {
+            if (e.getSlotType() == InventoryType.SlotType.CRAFTING) {
+                placedItem = getPlacedItem(e);
+            } else if (e.getSlotType() == InventoryType.SlotType.RESULT) {
+                AnvilInventory ai = (AnvilInventory) e.getInventory();
+                placedItem = ai.getItem(0);
+            }
         // Shift click requires special case
-        if (wasShiftedToAnvil(e)) {
+        } else if (wasShiftedToAnvil(e)) {
             placedItem = e.getCurrentItem();
         }
         return placedItem != null && placedItem.isSimilar(plugin.nugget);
