@@ -1,5 +1,6 @@
 package com.tisawesomeness.diamondnuggets;
 
+import com.tisawesomeness.diamondnuggets.listen.CraftListener;
 import com.tisawesomeness.diamondnuggets.listen.RenameListener;
 import com.tisawesomeness.diamondnuggets.listen.UnlockListener;
 import com.tisawesomeness.diamondnuggets.listen.UseListener;
@@ -81,6 +82,9 @@ public class DiamondNuggets extends JavaPlugin {
         man.registerEvents(new UnlockListener(this), this);
         if (getConfig().getBoolean("prevent-renames", true)) {
             man.registerEvents(new RenameListener(this), this);
+        }
+        if (getConfig().getBoolean("prevent-crafting", true)) {
+            man.registerEvents(new CraftListener(this), this);
         }
     }
 

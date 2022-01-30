@@ -27,3 +27,6 @@ prevent-renames: true
 
 # The message to display when a player is stopped from renaming diamond nuggets
 rename-disabled-message: "Renaming diamond nuggets is disabled due to Minecraft recipe limitations"
+
+# Whether to stop players from crafting other items with diamond nuggets
+prevent-crafting: true
