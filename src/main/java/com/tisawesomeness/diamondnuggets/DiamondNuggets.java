@@ -56,7 +56,9 @@ public class DiamondNuggets extends JavaPlugin {
         }
 
         // Don't add recipe if amount of nuggets is invalid
-        int ingredientCount = getConfig().getInt("nuggets-to-diamond");
+        // TODO Find workaround for 1.18 breaking shapeless exact recipe choice
+//        int ingredientCount = getConfig().getInt("nuggets-to-diamond");
+        int ingredientCount = 9;
         if (1 <= ingredientCount && ingredientCount <= 9) {
 
             addToNuggetRecipe(ingredientCount);
