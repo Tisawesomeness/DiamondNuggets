@@ -35,18 +35,21 @@ public class RenameListener implements Listener {
     }
 
     private boolean isTryingToRename(InventoryClickEvent e) {
+        if (e.getInventory().getType() != InventoryType.ANVIL) {
+            return false;
+        }
+
         ItemStack placedItem = null;
-        if (e.getInventory().getType() == InventoryType.ANVIL) {
-            if (e.getSlotType() == InventoryType.SlotType.CRAFTING) {
-                placedItem = getPlacedItem(e);
-            } else if (e.getSlotType() == InventoryType.SlotType.RESULT) {
-                AnvilInventory ai = (AnvilInventory) e.getInventory();
-                placedItem = ai.getItem(0);
-            }
-            // Shift click requires special case
+        if (e.getSlotType() == InventoryType.SlotType.CRAFTING) {
+            placedItem = getPlacedItem(e);
+        } else if (e.getSlotType() == InventoryType.SlotType.RESULT) {
+            AnvilInventory ai = (AnvilInventory) e.getInventory();
+            placedItem = ai.getItem(0);
+        // Shift click requires special case
         } else if (wasShiftedToAnvil(e)) {
             placedItem = e.getCurrentItem();
         }
+
         return placedItem != null && placedItem.isSimilar(plugin.nugget);
     }
     // returns null if no item was placed
@@ -57,13 +60,15 @@ public class RenameListener implements Listener {
         if (e.getAction() == InventoryAction.HOTBAR_SWAP) {
             return e.getView().getBottomInventory().getItem(e.getHotbarButton());
         }
+        if (wasShiftedToAnvil(e)) {
+            return e.getCurrentItem();
+        }
         return null;
     }
     private static boolean wasShiftedToAnvil(InventoryClickEvent e) {
         return e.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY &&
                 e.getClickedInventory() != null &&
                 e.getClickedInventory().getType() == InventoryType.PLAYER &&
-                e.getView().getTopInventory().getType() == InventoryType.ANVIL &&
                 (slotHasSpace(e, 0) || slotHasSpace(e, 1));
     }
     private static boolean slotHasSpace(InventoryClickEvent e, int slot) {
