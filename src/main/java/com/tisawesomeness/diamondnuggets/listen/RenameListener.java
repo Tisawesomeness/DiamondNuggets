@@ -3,13 +3,9 @@ package com.tisawesomeness.diamondnuggets.listen;
 import com.tisawesomeness.diamondnuggets.DiamondNuggets;
 
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
@@ -35,14 +31,6 @@ public class RenameListener implements Listener {
         if (isTryingToRename(e)) {
             e.setCancelled(true);
             e.getWhoClicked().sendMessage(ChatColor.RED + plugin.getConfig().getString("rename-disabled-message"));
-        }
-    }
-    @EventHandler
-    public void onPickupItem(EntityPickupItemEvent e) {
-        ItemStack item = e.getItem().getItemStack();
-        if (e.getEntityType() == EntityType.PLAYER &&
-                (item.getType() == Material.DIAMOND || item.isSimilar(plugin.nugget))) {
-            plugin.unlockRecipes((HumanEntity) e.getEntity());
         }
     }
 
