@@ -1,15 +1,13 @@
 package com.tisawesomeness.diamondnuggets;
 
-import com.tisawesomeness.diamondnuggets.listen.CraftListener;
-import com.tisawesomeness.diamondnuggets.listen.RenameListener;
-import com.tisawesomeness.diamondnuggets.listen.UnlockListener;
-import com.tisawesomeness.diamondnuggets.listen.UseListener;
+import com.tisawesomeness.diamondnuggets.listen.*;
 
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.PluginManager;
@@ -80,12 +78,14 @@ public class DiamondNuggets extends JavaPlugin {
         PluginManager man = getServer().getPluginManager();
         man.registerEvents(new UseListener(this), this);
         man.registerEvents(new UnlockListener(this), this);
-        if (getConfig().getBoolean("prevent-renames", true)) {
-            man.registerEvents(new RenameListener(this), this);
-        }
+
         if (getConfig().getBoolean("prevent-crafting", true)) {
             man.registerEvents(new CraftListener(this), this);
         }
+        if (getConfig().getBoolean("prevent-renames", true)) {
+            man.registerEvents(new InventoryDenyListener(this, InventoryType.ANVIL, true, 0, 1), this);
+        }
+        man.registerEvents(new InventoryDenyListener(this, InventoryType.GRINDSTONE, 0, 1), this);
     }
 
     private Material getNuggetMaterial() {

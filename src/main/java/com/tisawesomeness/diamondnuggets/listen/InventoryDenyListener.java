@@ -9,12 +9,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.EnumSet;
 
-public class RenameListener implements Listener {
+public class InventoryDenyListener implements Listener {
 
     private static final EnumSet<InventoryAction> PLACE_ACTIONS = EnumSet.of(
             InventoryAction.PLACE_ONE, InventoryAction.PLACE_SOME, InventoryAction.PLACE_ALL,
@@ -22,20 +21,31 @@ public class RenameListener implements Listener {
     );
 
     private final DiamondNuggets plugin;
-    public RenameListener(DiamondNuggets plugin) {
+    private final InventoryType type;
+    private final boolean sendMessage;
+    private final int[] craftingSlots;
+    public InventoryDenyListener(DiamondNuggets plugin, InventoryType type, int... craftingSlots) {
+        this(plugin, type, false, craftingSlots);
+    }
+    public InventoryDenyListener(DiamondNuggets plugin, InventoryType type, boolean sendMessage, int... craftingSlots) {
         this.plugin = plugin;
+        this.type = type;
+        this.sendMessage = sendMessage;
+        this.craftingSlots = craftingSlots;
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInventoryClick(InventoryClickEvent e) {
         if (isTryingToRename(e)) {
             e.setCancelled(true);
-            e.getWhoClicked().sendMessage(ChatColor.RED + plugin.getConfig().getString("rename-disabled-message"));
+            if (sendMessage) {
+                e.getWhoClicked().sendMessage(ChatColor.RED + plugin.getConfig().getString("rename-disabled-message"));
+            }
         }
     }
 
     private boolean isTryingToRename(InventoryClickEvent e) {
-        if (e.getInventory().getType() != InventoryType.ANVIL) {
+        if (e.getInventory().getType() != type) {
             return false;
         }
 
@@ -43,37 +53,47 @@ public class RenameListener implements Listener {
         if (e.getSlotType() == InventoryType.SlotType.CRAFTING) {
             placedItem = getPlacedItem(e);
         } else if (e.getSlotType() == InventoryType.SlotType.RESULT) {
-            AnvilInventory ai = (AnvilInventory) e.getInventory();
-            placedItem = ai.getItem(0);
+            for (int slot : craftingSlots) {
+                placedItem = e.getInventory().getItem(slot);
+                if (placedItem != null && placedItem.isSimilar(plugin.nugget)) {
+                    return true;
+                }
+            }
+            return false;
         // Shift click requires special case
-        } else if (wasShiftedToAnvil(e)) {
+        } else if (wasShiftedToUpper(e)) {
             placedItem = e.getCurrentItem();
         }
 
         return placedItem != null && placedItem.isSimilar(plugin.nugget);
     }
     // returns null if no item was placed
-    private static ItemStack getPlacedItem(InventoryClickEvent e) {
+    private ItemStack getPlacedItem(InventoryClickEvent e) {
         if (PLACE_ACTIONS.contains(e.getAction())) {
             return e.getCursor();
         }
         if (e.getAction() == InventoryAction.HOTBAR_SWAP) {
             return e.getView().getBottomInventory().getItem(e.getHotbarButton());
         }
-        if (wasShiftedToAnvil(e)) {
+        if (wasShiftedToUpper(e)) {
             return e.getCurrentItem();
         }
         return null;
     }
-    private static boolean wasShiftedToAnvil(InventoryClickEvent e) {
+    private boolean wasShiftedToUpper(InventoryClickEvent e) {
         return e.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY &&
                 e.getClickedInventory() != null &&
                 e.getClickedInventory().getType() == InventoryType.PLAYER &&
-                (slotHasSpace(e, 0) || slotHasSpace(e, 1));
+                anySlotHasSpace(e);
     }
-    private static boolean slotHasSpace(InventoryClickEvent e, int slot) {
-        ItemStack item = e.getView().getTopInventory().getItem(slot);
-        return item == null || itemHasSpaceForCurrent(e, item);
+    private boolean anySlotHasSpace(InventoryClickEvent e) {
+        for (int slot : craftingSlots) {
+            ItemStack item = e.getView().getTopInventory().getItem(slot);
+            if (item == null || itemHasSpaceForCurrent(e, item)) {
+                return true;
+            }
+        }
+        return false;
     }
     private static boolean itemHasSpaceForCurrent(InventoryClickEvent e, ItemStack item) {
         return item.getAmount() < item.getMaxStackSize() &&
