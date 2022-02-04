@@ -49,18 +49,16 @@ public class InventoryDenyListener implements Listener {
             return false;
         }
 
+        if (!plugin.getConfig().getBoolean("prevent-placement")) {
+            return e.getSlotType() == InventoryType.SlotType.RESULT && isTryingToClickResult(e);
+        }
+
         ItemStack placedItem = null;
-        if (e.getSlotType() == InventoryType.SlotType.CRAFTING) {
+        if (e.getSlotType() == InventoryType.SlotType.CRAFTING || e.getSlotType() == InventoryType.SlotType.FUEL) {
             placedItem = getPlacedItem(e);
         } else if (e.getSlotType() == InventoryType.SlotType.RESULT) {
-            for (int slot : inputSlots) {
-                placedItem = e.getInventory().getItem(slot);
-                if (placedItem != null && placedItem.isSimilar(plugin.nugget)) {
-                    return true;
-                }
-            }
-            return false;
-        // Shift click requires special case
+            return isTryingToClickResult(e);
+            // Shift click requires special case
         } else if (wasShiftedToUpper(e)) {
             placedItem = e.getCurrentItem();
         }
@@ -79,6 +77,16 @@ public class InventoryDenyListener implements Listener {
             return e.getCurrentItem();
         }
         return null;
+    }
+    private boolean isTryingToClickResult(InventoryClickEvent e) {
+        ItemStack placedItem;
+        for (int slot : inputSlots) {
+            placedItem = e.getInventory().getItem(slot);
+            if (placedItem != null && placedItem.isSimilar(plugin.nugget)) {
+                return true;
+            }
+        }
+        return false;
     }
     private boolean wasShiftedToUpper(InventoryClickEvent e) {
         return e.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY &&

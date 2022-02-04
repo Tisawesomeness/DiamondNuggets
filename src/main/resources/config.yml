@@ -1,14 +1,23 @@
+# This plugin is meant for fairly vanilla servers.
+# If you want more robust recipe configuration or protection against glitches/exploits
+# from other plugins, consider using a dedicated custom recipe or custom item plugin.
+
 # The name of the diamond nugget item, must be 1-50 characters
 # Changing the name will make existing nuggets unable to be combined back into a diamond
 # unless the player renames the nuggets back to the new name
 item-name: "Diamond Nugget"
 
 # The nugget material used to represent diamond nuggets, cannot be air or an unstackable item
+# Changing the material will make existing nuggets unable to be combined back into a diamond
+#
 # Nugget items cannot be accidentally placed, used by right clicking, or used in crafting except for:
 # - Powering a beacon
+# - Using an item as a brewing stand ingredient
 # - Fueling a brewing stand with blaze powder
 # - Mobs being attracted to and picking up items
 # - Shenanigans from other plugins
+# due to Spigot limitations
+#
 # See the link below for a list of possible materials
 # https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
 # GOLD_NUGGET (beware piglins), IRON_NUGGET, or AMETHYST_SHARD recommended
@@ -34,3 +43,16 @@ rename-disabled-message: "Renaming diamond nuggets is disabled due to Minecraft 
 
 # Whether to stop players from crafting other items with diamond nuggets
 prevent-crafting: true
+
+# Whether to completely stop players from placing nuggets in a
+# stonecutter, cartography table, loom, anvil, grindstone, or villager trading menu.
+# This will also prevent placement in brewing stands, but players can bypass it by glitching.
+#
+# When true, players will not be able to place nuggets in the above menus, but won't be able to shift click
+# nuggets while one of these menus is open, even if the nugget would normally be shifted into the hotbar.
+# When false, the crafting/trading output will appear if the nugget forms a valid recipe, but players
+# will not be able to click the result and put it into their inventory.
+# Note that it is possible for players to glitch nuggets into the inventory, but cannot get the crafting result.
+#
+# Set to false if you are using one of the three recommended nugget items.
+prevent-placement: false
