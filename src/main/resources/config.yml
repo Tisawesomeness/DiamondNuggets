@@ -3,11 +3,15 @@
 # unless the player renames the nuggets back to the new name
 item-name: "Diamond Nugget"
 
-# The nugget material used to represent diamond nuggets, cannot be air
-# Nugget items cannot be placed or used by accident through vanilla means,
-# but beware that other plugins may not recognize that the nugget item is special
-# See the link below for a list
+# The nugget material used to represent diamond nuggets, cannot be air or an unstackable item
+# Nugget items cannot be accidentally placed, used by right clicking, or used in crafting except for:
+# - Powering a beacon
+# - Fueling a brewing stand with blaze powder
+# - Mobs being attracted to and picking up items
+# - Shenanigans from other plugins
+# See the link below for a list of possible materials
 # https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
+# GOLD_NUGGET (beware piglins), IRON_NUGGET, or AMETHYST_SHARD recommended
 item-material: GOLD_NUGGET
 
 # TEMPORARILY DISABLED: 1.18 breaks custom shapeless recipes, must be kept at 9

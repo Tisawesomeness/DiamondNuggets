@@ -11,8 +11,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
+import org.bukkit.event.inventory.PrepareSmithingEvent;
+import org.bukkit.event.inventory.SmithItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
+import org.bukkit.inventory.SmithingInventory;
 
 public class CraftListener implements Listener {
 
@@ -56,6 +59,32 @@ public class CraftListener implements Listener {
             }
         }
         return false;
+    }
+
+    @EventHandler
+    public void onPrepareItemSmith(PrepareSmithingEvent e) {
+        HumanEntity he = e.getView().getPlayer();
+        if (he instanceof Player player) {
+            if (isInvalidNuggetSmith(e.getInventory())) {
+                e.getInventory().setResult(new ItemStack(Material.AIR));
+                Bukkit.getScheduler().runTask(plugin, player::updateInventory);
+            }
+        }
+    }
+    @EventHandler
+    public void onSmith(SmithItemEvent e) {
+        if (isInvalidNuggetSmith(e.getInventory())) {
+            e.setCancelled(true);
+        }
+    }
+
+    private boolean isInvalidNuggetSmith(SmithingInventory inv) {
+        ItemStack i1 = inv.getItem(0);
+        if (i1 != null && i1.isSimilar(plugin.nugget)) {
+            return true;
+        }
+        ItemStack i2 = inv.getItem(1);
+        return i2 != null && i2.isSimilar(plugin.nugget);
     }
 
 }

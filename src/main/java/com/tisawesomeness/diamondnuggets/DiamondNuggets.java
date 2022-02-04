@@ -81,6 +81,12 @@ public class DiamondNuggets extends JavaPlugin {
 
         if (getConfig().getBoolean("prevent-crafting", true)) {
             man.registerEvents(new CraftListener(this), this);
+            man.registerEvents(new InventoryDenyListener(this, InventoryType.STONECUTTER, 0), this);
+            man.registerEvents(new InventoryDenyListener(this, InventoryType.CARTOGRAPHY, 0, 1), this);
+            man.registerEvents(new InventoryDenyListener(this, InventoryType.LOOM, 0, 1, 2), this);
+            man.registerEvents(new InventoryDenyListener(this, InventoryType.BREWING, 3), this);
+            man.registerEvents(new InventoryDenyListener(this, InventoryType.MERCHANT, 0, 1), this);
+            man.registerEvents(new BrewListener(this), this);
         }
         if (getConfig().getBoolean("prevent-renames", true)) {
             man.registerEvents(new InventoryDenyListener(this, InventoryType.ANVIL, true, 0, 1), this);
@@ -103,6 +109,9 @@ public class DiamondNuggets extends JavaPlugin {
         if (nuggetMat.isAir()) {
             err("The item material cannot be air!");
             return null;
+        }
+        if (nuggetMat.getMaxStackSize() < 9) {
+            err("The item material must have a max stack size of 9 or more!");
         }
         return nuggetMat;
     }

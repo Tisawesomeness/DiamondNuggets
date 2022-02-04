@@ -23,20 +23,20 @@ public class InventoryDenyListener implements Listener {
     private final DiamondNuggets plugin;
     private final InventoryType type;
     private final boolean sendMessage;
-    private final int[] craftingSlots;
-    public InventoryDenyListener(DiamondNuggets plugin, InventoryType type, int... craftingSlots) {
-        this(plugin, type, false, craftingSlots);
+    private final int[] inputSlots;
+    public InventoryDenyListener(DiamondNuggets plugin, InventoryType type, int... inputSlots) {
+        this(plugin, type, false, inputSlots);
     }
-    public InventoryDenyListener(DiamondNuggets plugin, InventoryType type, boolean sendMessage, int... craftingSlots) {
+    public InventoryDenyListener(DiamondNuggets plugin, InventoryType type, boolean sendMessage, int... inputSlots) {
         this.plugin = plugin;
         this.type = type;
         this.sendMessage = sendMessage;
-        this.craftingSlots = craftingSlots;
+        this.inputSlots = inputSlots;
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInventoryClick(InventoryClickEvent e) {
-        if (isTryingToRename(e)) {
+        if (isTryingToUse(e)) {
             e.setCancelled(true);
             if (sendMessage) {
                 e.getWhoClicked().sendMessage(ChatColor.RED + plugin.getConfig().getString("rename-disabled-message"));
@@ -44,7 +44,7 @@ public class InventoryDenyListener implements Listener {
         }
     }
 
-    private boolean isTryingToRename(InventoryClickEvent e) {
+    private boolean isTryingToUse(InventoryClickEvent e) {
         if (e.getInventory().getType() != type) {
             return false;
         }
@@ -53,7 +53,7 @@ public class InventoryDenyListener implements Listener {
         if (e.getSlotType() == InventoryType.SlotType.CRAFTING) {
             placedItem = getPlacedItem(e);
         } else if (e.getSlotType() == InventoryType.SlotType.RESULT) {
-            for (int slot : craftingSlots) {
+            for (int slot : inputSlots) {
                 placedItem = e.getInventory().getItem(slot);
                 if (placedItem != null && placedItem.isSimilar(plugin.nugget)) {
                     return true;
@@ -87,7 +87,7 @@ public class InventoryDenyListener implements Listener {
                 anySlotHasSpace(e);
     }
     private boolean anySlotHasSpace(InventoryClickEvent e) {
-        for (int slot : craftingSlots) {
+        for (int slot : inputSlots) {
             ItemStack item = e.getView().getTopInventory().getItem(slot);
             if (item == null || itemHasSpaceForCurrent(e, item)) {
                 return true;
