@@ -26,6 +26,8 @@ public class DiamondNuggets extends JavaPlugin {
     @Override
     public void onEnable() {
         saveDefaultConfig();
+        getConfig().options().copyDefaults(true).parseComments(true);
+        saveConfig();
 
         String itemName = getConfig().getString("item-name");
         if (itemName == null || itemName.isEmpty()) {
