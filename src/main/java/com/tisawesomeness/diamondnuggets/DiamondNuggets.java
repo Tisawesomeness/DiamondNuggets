@@ -19,6 +19,18 @@ import java.io.StringWriter;
 
 public class DiamondNuggets extends JavaPlugin {
 
+    private static final String[][] SHAPES = {
+            {"#"},
+            {"##"},
+            {"# ", "##"},
+            {"##", "##"},
+            {" # ", "###", " # "},
+            {"###", "###"},
+            {" # ", "###", "###"},
+            {"###", "# #", "###"},
+            {"###", "###", "###"}
+    };
+
     public final NamespacedKey toNuggetKey = new NamespacedKey(this, "nugget");
     public final NamespacedKey toDiamondKey = new NamespacedKey(this, "diamond");
     public ItemStack nugget = null;
@@ -57,9 +69,7 @@ public class DiamondNuggets extends JavaPlugin {
         }
 
         // Don't add recipe if amount of nuggets is invalid
-        // TODO Find workaround for 1.18 breaking shapeless exact recipe choice
-//        int ingredientCount = getConfig().getInt("nuggets-to-diamond");
-        int ingredientCount = 9;
+        int ingredientCount = getConfig().getInt("nuggets-to-diamond");
         if (1 <= ingredientCount && ingredientCount <= 9) {
 
             addToNuggetRecipe(ingredientCount);
@@ -135,18 +145,14 @@ public class DiamondNuggets extends JavaPlugin {
         getServer().addRecipe(getToDiamondRecipe(ingredientCount));
     }
     private Recipe getToDiamondRecipe(int ingredientCount) {
-        if (ingredientCount == 9) {
-            ShapedRecipe toDiamondRecipe = new ShapedRecipe(toDiamondKey, new ItemStack(Material.DIAMOND));
-            toDiamondRecipe.shape("###", "###", "###");
-            toDiamondRecipe.setIngredient('#', new RecipeChoice.ExactChoice(nugget));
-            return toDiamondRecipe;
-        }
-        ShapelessRecipe toDiamondRecipe = new ShapelessRecipe(toDiamondKey, new ItemStack(Material.DIAMOND));
-        RecipeChoice choice = new RecipeChoice.ExactChoice(nugget);
-        for (int i = 0; i < ingredientCount; i++) {
-            toDiamondRecipe.addIngredient(choice);
-        }
+        // Shapeless recipe doesn't work with nbt :(
+        ShapedRecipe toDiamondRecipe = new ShapedRecipe(toDiamondKey, new ItemStack(Material.DIAMOND));
+        toDiamondRecipe.shape(getToDiamondRecipeShape(ingredientCount));
+        toDiamondRecipe.setIngredient('#', new RecipeChoice.ExactChoice(nugget));
         return toDiamondRecipe;
+    }
+    private static String[] getToDiamondRecipeShape(int ingredientCount) {
+        return SHAPES[ingredientCount - 1];
     }
 
     // ingredientCount assumed 1-64
