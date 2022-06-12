@@ -2,6 +2,7 @@ package com.tisawesomeness.diamondnuggets;
 
 import com.tisawesomeness.diamondnuggets.listen.*;
 
+import com.tchristofferson.configupdater.ConfigUpdater;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
@@ -13,6 +14,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -38,8 +40,13 @@ public class DiamondNuggets extends JavaPlugin {
     @Override
     public void onEnable() {
         saveDefaultConfig();
-        getConfig().options().copyDefaults(true).parseComments(true);
-        saveConfig();
+        getConfig().options().copyDefaults(true);
+        try {
+            ConfigUpdater.update(this, "config.yml", new File(getDataFolder(), "config.yml"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        reloadConfig();
 
         String itemName = getConfig().getString("item-name");
         if (itemName == null || itemName.isEmpty()) {

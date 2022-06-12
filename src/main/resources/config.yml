@@ -20,13 +20,13 @@ item-name: "Diamond Nugget"
 #
 # See the link below for a list of possible materials
 # https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
-# GOLD_NUGGET (beware piglins), IRON_NUGGET, or AMETHYST_SHARD recommended
+# GOLD_NUGGET (beware piglins), IRON_NUGGET, AMETHYST_SHARD (1.17+), or ECHO_SHARD (1.19+) recommended
 item-material: GOLD_NUGGET
 
 # The amount of nuggets needed to craft a diamond
 # Must be between 1-9, 4 or 9 is recommended
 # 1-4 nuggets will fit in the 2x2 crafting grid
-# Note that the recipes are shaped because 1.18 breaks custom shapeless recipes
+# All recipes are shaped due to vanilla limitations
 nuggets-to-diamond: 9
 
 # Whether the recipes unlock on join (or plugin enable) regardless of what items the player has
@@ -55,5 +55,5 @@ prevent-crafting: true
 # will not be able to click the result and put it into their inventory.
 # Note that it is possible for players to glitch nuggets into the inventory, but cannot get the crafting result.
 #
-# Set to false if you are using one of the three recommended nugget items.
+# Set to false if you are using one of the recommended nugget items.
 prevent-placement: false
