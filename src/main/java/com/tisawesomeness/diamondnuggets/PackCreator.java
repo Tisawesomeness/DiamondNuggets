@@ -1,5 +1,6 @@
 package com.tisawesomeness.diamondnuggets;
 
+import com.google.gson.*;
 import org.bukkit.Material;
 
 import java.io.*;
@@ -57,13 +58,21 @@ public class PackCreator {
                 Files.delete(packPath);
                 return true;
             }
+
             String storedItemMaterial = packProp.getProperty("item-material");
             if (storedItemMaterial == null || Material.matchMaterial(storedItemMaterial) != itemMaterial) {
                 Files.delete(packPath);
                 return true;
             }
+
             String storedPluginVersion = packProp.getProperty("plugin-version");
             if (!pluginVersion.equals(storedPluginVersion)) {
+                Files.delete(packPath);
+                return true;
+            }
+
+            String storedPackFormat = packProp.getProperty("pack-format");
+            if (!String.valueOf(SpigotVersion.SERVER_VERSION.packFormat).equals(storedPackFormat)) {
                 Files.delete(packPath);
                 return true;
             }
@@ -101,9 +110,14 @@ public class PackCreator {
         }
 
         copyFromResources("diamond_nugget.png", textureFolderPath.resolve("diamond_nugget.png"));
-
-        copyFromResources("pack.mcmeta", packFolderPath.resolve("pack.mcmeta"));
         copyFromResources("diamond_nugget.png", packFolderPath.resolve("pack.png"));
+
+        String packMeta = readFromResources("pack.mcmeta");
+        JsonObject packMetaJson = new JsonParser().parse(packMeta).getAsJsonObject();
+        int packFormat = SpigotVersion.SERVER_VERSION.packFormat;
+        packMetaJson.getAsJsonObject("pack").addProperty("pack_format", packFormat);
+        String packMetaStr = new GsonBuilder().setPrettyPrinting().create().toJson(packMetaJson);
+        Files.write(packFolderPath.resolve("pack.mcmeta"), packMetaStr.getBytes());
 
         zip(packFolderPath, getZipPath(dataPath, itemName));
 
@@ -111,6 +125,7 @@ public class PackCreator {
         packProp.setProperty("item-name", itemName);
         packProp.setProperty("item-material", materialName);
         packProp.setProperty("plugin-version", pluginVersion);
+        packProp.setProperty("pack-format", String.valueOf(packFormat));
         try (OutputStream os = Files.newOutputStream(packDataPath)) {
             packProp.store(os, "Do not modify");
         }
@@ -140,6 +155,14 @@ public class PackCreator {
                 throw new IllegalStateException(resource + " not found in resources!");
             }
             Files.copy(is, targetPath);
+        }
+    }
+    private static String readFromResources(String resource) throws IOException {
+        try (InputStream is = PackCreator.class.getClassLoader().getResourceAsStream(resource)) {
+            if (is == null) {
+                throw new IllegalStateException(resource + " not found in resources!");
+            }
+            return new String(is.readAllBytes());
         }
     }
 
