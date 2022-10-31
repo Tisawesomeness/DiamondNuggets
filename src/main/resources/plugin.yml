@@ -3,3 +3,4 @@ version: '${version}'
 main: com.tisawesomeness.diamondnuggets.DiamondNuggets
 api-version: 1.16
 authors: [ Tis_awesomeness ]
+website: tis.codes
