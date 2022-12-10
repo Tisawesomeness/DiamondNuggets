@@ -10,6 +10,7 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Properties;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -185,15 +186,15 @@ public class PackCreator {
         }
         return sanitized;
     }
-    // https://stackoverflow.com/a/32052016
+    // Adapted from https://stackoverflow.com/a/32052016
     private void zip(Path sourcePath, Path targetPath) throws IOException {
         if (Files.exists(targetPath)) {
             Files.delete(targetPath);
         }
         Files.createFile(targetPath);
-        try (ZipOutputStream zs = new ZipOutputStream(Files.newOutputStream(targetPath))) {
-            Files.walk(sourcePath)
-                    .filter(path -> !Files.isDirectory(path))
+        try (ZipOutputStream zs = new ZipOutputStream(Files.newOutputStream(targetPath));
+             Stream<Path> paths = Files.walk(sourcePath)) {
+            paths.filter(path -> !Files.isDirectory(path))
                     .forEach(path -> addZipEntry(sourcePath, zs, path));
         }
     }
