@@ -19,6 +19,8 @@ public class DiamondNuggetsConfig {
     public final String renameDisabledMessage;
     public final boolean preventCrafting;
     public final boolean preventPlacement;
+    /** -1 to use server default */
+    public final int packFormat;
 
     public DiamondNuggetsConfig(DiamondNuggets plugin) {
         this.plugin = plugin;
@@ -31,6 +33,7 @@ public class DiamondNuggetsConfig {
         renameDisabledMessage = conf.getString("rename-disabled-message");
         preventCrafting = conf.getBoolean("prevent-crafting");
         preventPlacement = conf.getBoolean("prevent-placement");
+        packFormat = conf.getInt("pack-format");
     }
 
     private String checkItemName(String name) {
@@ -88,6 +91,9 @@ public class DiamondNuggetsConfig {
     }
     public boolean isNuggetsToDiamondValid() {
         return 1 <= nuggetsToDiamond && nuggetsToDiamond <= 9;
+    }
+    public boolean shouldUseServerPackFormat() {
+        return packFormat == -1;
     }
 
 }

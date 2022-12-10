@@ -21,9 +21,18 @@ public class PackCreator {
 
     private final Path dataPath;
     private final String pluginVersion;
-    public PackCreator(Path dataPath, String pluginVersion) {
-        this.dataPath = dataPath;
-        this.pluginVersion = pluginVersion;
+    private final int packFormat;
+
+    public PackCreator(DiamondNuggets plugin) {
+        this.dataPath = plugin.getDataFolder().toPath();
+        this.pluginVersion = plugin.getDescription().getVersion();
+        packFormat = getPackFormat(plugin);
+    }
+    private int getPackFormat(DiamondNuggets plugin) {
+        if (plugin.config.shouldUseServerPackFormat()) {
+            return SpigotVersion.SERVER_VERSION.packFormat;
+        }
+        return plugin.config.packFormat;
     }
 
     public boolean createPackIfNeeded(String itemName, Material itemMaterial) throws IOException {
@@ -72,7 +81,7 @@ public class PackCreator {
             }
 
             String storedPackFormat = packProp.getProperty("pack-format");
-            if (!String.valueOf(SpigotVersion.SERVER_VERSION.packFormat).equals(storedPackFormat)) {
+            if (!String.valueOf(packFormat).equals(storedPackFormat)) {
                 Files.delete(packPath);
                 return true;
             }
@@ -114,7 +123,6 @@ public class PackCreator {
 
         String packMeta = readFromResources("pack.mcmeta");
         JsonObject packMetaJson = new JsonParser().parse(packMeta).getAsJsonObject();
-        int packFormat = SpigotVersion.SERVER_VERSION.packFormat;
         packMetaJson.getAsJsonObject("pack").addProperty("pack_format", packFormat);
         String packMetaStr = new GsonBuilder().setPrettyPrinting().create().toJson(packMetaJson);
         Files.write(packFolderPath.resolve("pack.mcmeta"), packMetaStr.getBytes());
