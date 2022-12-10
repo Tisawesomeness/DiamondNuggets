@@ -6,7 +6,8 @@ public enum SpigotVersion {
     V1_16_5("1.16.5", 6),
     V1_17_1("1.17.1", 7),
     V1_18_2("1.18.2", 8),
-    V1_19("1.19", 9);
+    V1_19("1.19", 9),
+    V1_19_3("1.19.3", 12);
 
     private final String version;
     public final int packFormat;
