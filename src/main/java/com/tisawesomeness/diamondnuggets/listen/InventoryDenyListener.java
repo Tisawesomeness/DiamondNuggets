@@ -38,8 +38,8 @@ public class InventoryDenyListener implements Listener {
     public void onInventoryClick(InventoryClickEvent e) {
         if (isTryingToUse(e)) {
             e.setCancelled(true);
-            if (sendMessage) {
-                e.getWhoClicked().sendMessage(ChatColor.RED + plugin.getConfig().getString("rename-disabled-message"));
+            if (sendMessage && plugin.config.renameDisabledMessage != null) {
+                e.getWhoClicked().sendMessage(ChatColor.RED + plugin.config.renameDisabledMessage);
             }
         }
     }
@@ -49,7 +49,7 @@ public class InventoryDenyListener implements Listener {
             return false;
         }
 
-        if (!plugin.getConfig().getBoolean("prevent-placement")) {
+        if (!plugin.config.preventPlacement) {
             return e.getSlotType() == InventoryType.SlotType.RESULT && isTryingToClickResult(e);
         }
 

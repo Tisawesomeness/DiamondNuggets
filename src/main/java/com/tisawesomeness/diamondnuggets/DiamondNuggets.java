@@ -36,6 +36,7 @@ public class DiamondNuggets extends JavaPlugin {
     public final NamespacedKey toNuggetKey = new NamespacedKey(this, "nugget");
     public final NamespacedKey toDiamondKey = new NamespacedKey(this, "diamond");
     public ItemStack nugget = null;
+    public DiamondNuggetsConfig config = null;
 
     @Override
     public void onEnable() {
@@ -48,25 +49,16 @@ public class DiamondNuggets extends JavaPlugin {
         }
         reloadConfig();
 
-        String itemName = getConfig().getString("item-name");
-        if (itemName == null || itemName.isEmpty()) {
-            err("Item name cannot be empty!");
-            return;
-        }
-        if (itemName.length() > 50) {
-            err("Item name must be 50 characters or less but was " + itemName.length() + " characters!");
+        config = new DiamondNuggetsConfig(this);
+        if (!config.isValid()) {
             return;
         }
 
-        Material nuggetMat = getNuggetMaterial();
-        if (nuggetMat == null) {
-            return;
-        }
-        nugget = initNugget(nuggetMat);
+        nugget = initNugget(config.itemMaterial);
 
         try {
             PackCreator packCreator = new PackCreator(getDataFolder().toPath(), getDescription().getVersion());
-            if (packCreator.createPackIfNeeded(itemName, nuggetMat)) {
+            if (packCreator.createPackIfNeeded(config.itemName, config.itemMaterial)) {
                 log("Resource pack created");
             } else {
                 log("Resource pack already exists");
@@ -76,21 +68,16 @@ public class DiamondNuggets extends JavaPlugin {
         }
 
         // Don't add recipe if amount of nuggets is invalid
-        int ingredientCount = getConfig().getInt("nuggets-to-diamond");
-        if (1 <= ingredientCount && ingredientCount <= 9) {
-
-            addToNuggetRecipe(ingredientCount);
-            addToDiamondRecipe(ingredientCount);
+        if (config.isNuggetsToDiamondValid()) {
+            addToNuggetRecipe(config.nuggetsToDiamond);
+            addToDiamondRecipe(config.nuggetsToDiamond);
 
             // In case plugin is reloaded while server is running, give recipes to all online players
             for (Player p : getServer().getOnlinePlayers()) {
-                if (getConfig().getBoolean("unlock-on-join") || shouldUnlockRecipes(p.getInventory())) {
+                if (config.unlockOnJoin || shouldUnlockRecipes(p.getInventory())) {
                     unlockRecipes(p);
                 }
             }
-
-        } else {
-            err("Amount of nuggets to craft a diamond must be between 1-9 but was " + ingredientCount + "!");
         }
 
         // Prevent renaming even if recipes are temporarily invalid
@@ -98,7 +85,7 @@ public class DiamondNuggets extends JavaPlugin {
         man.registerEvents(new UseListener(this), this);
         man.registerEvents(new UnlockListener(this), this);
 
-        if (getConfig().getBoolean("prevent-crafting", true)) {
+        if (config.preventCrafting) {
             man.registerEvents(new CraftListener(this), this);
             man.registerEvents(new InventoryDenyListener(this, InventoryType.STONECUTTER, 0), this);
             man.registerEvents(new InventoryDenyListener(this, InventoryType.CARTOGRAPHY, 0, 1), this);
@@ -107,39 +94,18 @@ public class DiamondNuggets extends JavaPlugin {
             man.registerEvents(new InventoryDenyListener(this, InventoryType.MERCHANT, 0, 1), this);
             man.registerEvents(new BrewListener(this), this);
         }
-        if (getConfig().getBoolean("prevent-renames", true)) {
+        if (config.preventRenames) {
             man.registerEvents(new InventoryDenyListener(this, InventoryType.ANVIL, true, 0, 1), this);
         }
         man.registerEvents(new InventoryDenyListener(this, InventoryType.GRINDSTONE, 0, 1), this);
     }
 
-    private Material getNuggetMaterial() {
-        String nuggetStr = getConfig().getString("item-material");
-        if (nuggetStr == null) {
-            err("The item material was missing from the config!");
-            return null;
-        }
-        Material nuggetMat = Material.matchMaterial(nuggetStr);
-        if (nuggetMat == null) {
-            err(nuggetStr + " is not a valid material!");
-            return null;
-        }
-        // Air cannot be crafted
-        if (nuggetMat.isAir()) {
-            err("The item material cannot be air!");
-            return null;
-        }
-        if (nuggetMat.getMaxStackSize() < 9) {
-            err("The item material must have a max stack size of 9 or more!");
-        }
-        return nuggetMat;
-    }
     private ItemStack initNugget(Material nuggetMat) {
         ItemStack nugget = new ItemStack(nuggetMat);
         nugget.addUnsafeEnchantment(Enchantment.LOOT_BONUS_BLOCKS, Enchantment.LOOT_BONUS_BLOCKS.getMaxLevel());
         ItemMeta meta = nugget.getItemMeta();
         assert meta != null;
-        meta.setDisplayName(getConfig().getString("item-name"));
+        meta.setDisplayName(config.itemName);
         meta.setUnbreakable(true); // unbreakable flag prevents cheating with enchants
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_UNBREAKABLE);
         nugget.setItemMeta(meta);
