@@ -36,4 +36,8 @@ public enum SpigotVersion {
         return null;
     }
 
+    public boolean supportsRecipeBookCategory() {
+        return this.compareTo(V1_19_3) >= 0;
+    }
+
 }

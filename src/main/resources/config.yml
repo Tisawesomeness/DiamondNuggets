@@ -29,6 +29,11 @@ item-material: GOLD_NUGGET
 # All recipes are shaped due to vanilla limitations
 nuggets-to-diamond: 9
 
+# The recipe book category to put the recipes in
+# One of BUILDING, REDSTONE, EQUIPMENT, or MISC (default)
+# Only works from versions 1.19.3 and later
+recipe-book-category: MISC
+
 # Whether the recipes unlock on join (or plugin enable) regardless of what items the player has
 # If false, players will unlock the recipes when picking up a diamond or diamond nugget
 unlock-on-join: true

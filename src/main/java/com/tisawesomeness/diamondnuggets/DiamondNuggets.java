@@ -115,14 +115,12 @@ public class DiamondNuggets extends JavaPlugin {
     // Known bug: recipe book doesn't autofill custom items
     // ingredientCount assumed 1-9
     private void addToDiamondRecipe(int ingredientCount) {
-        getServer().addRecipe(getToDiamondRecipe(ingredientCount));
-    }
-    private Recipe getToDiamondRecipe(int ingredientCount) {
         // Shapeless recipe doesn't work with nbt :(
         ShapedRecipe toDiamondRecipe = new ShapedRecipe(toDiamondKey, new ItemStack(Material.DIAMOND));
         toDiamondRecipe.shape(getToDiamondRecipeShape(ingredientCount));
         toDiamondRecipe.setIngredient('#', new RecipeChoice.ExactChoice(nugget));
-        return toDiamondRecipe;
+        setRecipeBookCategory(toDiamondRecipe);
+        getServer().addRecipe(toDiamondRecipe);
     }
     private static String[] getToDiamondRecipeShape(int ingredientCount) {
         return SHAPES[ingredientCount - 1];
@@ -134,7 +132,34 @@ public class DiamondNuggets extends JavaPlugin {
         nuggets.setAmount(ingredientCount);
         ShapelessRecipe toNuggetRecipe = new ShapelessRecipe(toNuggetKey, nuggets);
         toNuggetRecipe.addIngredient(1, Material.DIAMOND);
+        setRecipeBookCategory(toNuggetRecipe);
         getServer().addRecipe(toNuggetRecipe);
+    }
+
+    // Either shaped or shapeless recipe
+    private void setRecipeBookCategory(Recipe recipe) {
+        if (!SpigotVersion.SERVER_VERSION.supportsRecipeBookCategory()) {
+            return;
+        }
+        try {
+            Class<?> categoryClass = Class.forName("org.bukkit.inventory.recipe.CraftingBookCategory");
+            Object category = findRecipeBookCategory(categoryClass);
+            if (category == null) {
+                err("Could not find recipe book category " + config.recipeBookCategory);
+                return;
+            }
+            recipe.getClass().getMethod("setCategory", categoryClass).invoke(recipe, category);
+        } catch (ReflectiveOperationException e) {
+            e.printStackTrace();
+        }
+    }
+    private Object findRecipeBookCategory(Class<?> categoryClass) {
+        for (Object obj : categoryClass.getEnumConstants()) {
+            if (obj.toString().equalsIgnoreCase(config.recipeBookCategory)) {
+                return obj;
+            }
+        }
+        return null;
     }
 
     @Override

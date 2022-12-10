@@ -13,6 +13,8 @@ public class DiamondNuggetsConfig {
     public final Material itemMaterial;
     /** Valid if between 1 and 9, -1 if invalid */
     public final int nuggetsToDiamond;
+    /** MISC default */
+    public final String recipeBookCategory;
     public final boolean unlockOnJoin;
     public final boolean preventRenames;
     /** May be null */
@@ -28,6 +30,7 @@ public class DiamondNuggetsConfig {
         itemName = checkItemName(conf.getString("item-name"));
         itemMaterial = getNuggetMaterial(conf.getString("item-material"));
         nuggetsToDiamond = checkNuggetsToDiamond(conf.getInt("nuggets-to-diamond"));
+        recipeBookCategory = conf.getString("recipe-book-category", "MISC");
         unlockOnJoin = conf.getBoolean("unlock-on-join", true);
         preventRenames = conf.getBoolean("prevent-renames", true);
         renameDisabledMessage = conf.getString("rename-disabled-message");
