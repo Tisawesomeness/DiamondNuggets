@@ -8,6 +8,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -22,18 +23,12 @@ public class PackCreator {
 
     private final Path dataPath;
     private final String pluginVersion;
-    private final int packFormat;
+    private final DiamondNuggetsConfig config;
 
     public PackCreator(DiamondNuggets plugin) {
-        this.dataPath = plugin.getDataFolder().toPath();
-        this.pluginVersion = plugin.getDescription().getVersion();
-        packFormat = getPackFormat(plugin);
-    }
-    private int getPackFormat(DiamondNuggets plugin) {
-        if (plugin.config.shouldUseServerPackFormat()) {
-            return SpigotVersion.SERVER_VERSION.packFormat;
-        }
-        return plugin.config.packFormat;
+        dataPath = plugin.getDataFolder().toPath();
+        pluginVersion = plugin.getDescription().getVersion();
+        config = plugin.config;
     }
 
     public boolean createPackIfNeeded(String itemName, Material itemMaterial) throws IOException {
@@ -81,8 +76,14 @@ public class PackCreator {
                 return true;
             }
 
+            String storedCustomModelData = packProp.getProperty("custom-model-data");
+            if (!String.valueOf(config.customModelData).equals(storedCustomModelData)) {
+                Files.delete(packPath);
+                return true;
+            }
+
             String storedPackFormat = packProp.getProperty("pack-format");
-            if (!String.valueOf(packFormat).equals(storedPackFormat)) {
+            if (!String.valueOf(getPackFormat()).equals(storedPackFormat)) {
                 Files.delete(packPath);
                 return true;
             }
@@ -101,30 +102,29 @@ public class PackCreator {
         if (Files.exists(packFolderPath)) {
             deleteDirectoryRecursive(packFolderPath);
         }
-        Path textureFolderPath = resolve(packFolderPath, "assets", "minecraft", "optifine", "cit", "tis");
-        Files.createDirectories(textureFolderPath);
+        Path minecraftFolderPath = resolve(packFolderPath, "assets", "minecraft");
+        Files.createDirectories(minecraftFolderPath);
+
+        if (config.shouldUseCustomModelData()) {
+            createCustomModelPack(minecraftFolderPath, itemMaterial);
+        } else {
+            createCITPack(minecraftFolderPath, itemMaterial);
+        }
+
+        copyFromResources("diamond_nugget.png", packFolderPath.resolve("pack.png"));
 
         String materialName = itemMaterial.getKey().getKey();
-
-        Properties textureProp = new Properties();
-        try (InputStream is = getClass().getClassLoader().getResourceAsStream("diamond_nugget.properties")) {
-            if (is == null) {
-                throw new IllegalStateException("diamond_nugget.properties not found in resources!");
-            }
-            textureProp.load(is);
-        }
-        textureProp.setProperty("items", materialName);
-        Path propPath = textureFolderPath.resolve("diamond_nugget.properties");
-        try (OutputStream os = Files.newOutputStream(propPath)) {
-            textureProp.store(os, null);
-        }
-
-        copyFromResources("diamond_nugget.png", textureFolderPath.resolve("diamond_nugget.png"));
-        copyFromResources("diamond_nugget.png", packFolderPath.resolve("pack.png"));
+        int packFormat = getPackFormat();
 
         String packMeta = readFromResources("pack.mcmeta");
         JsonObject packMetaJson = new JsonParser().parse(packMeta).getAsJsonObject();
-        packMetaJson.getAsJsonObject("pack").addProperty("pack_format", packFormat);
+        JsonObject packMetaJsonPack = packMetaJson.getAsJsonObject("pack");
+        packMetaJsonPack.addProperty("pack_format", packFormat);
+        if (!config.shouldUseCustomModelData()) {
+            String description = packMetaJsonPack.get("description").getAsString();
+            String newDescription = description + "\n§4Optifine/CIT Resewn required";
+            packMetaJsonPack.addProperty("description", newDescription);
+        }
         String packMetaStr = new GsonBuilder().setPrettyPrinting().create().toJson(packMetaJson);
         Files.write(packFolderPath.resolve("pack.mcmeta"), packMetaStr.getBytes());
 
@@ -134,10 +134,64 @@ public class PackCreator {
         packProp.setProperty("item-name", itemName);
         packProp.setProperty("item-material", materialName);
         packProp.setProperty("plugin-version", pluginVersion);
+        packProp.setProperty("custom-model-data", String.valueOf(config.customModelData));
         packProp.setProperty("pack-format", String.valueOf(packFormat));
         try (OutputStream os = Files.newOutputStream(packDataPath)) {
             packProp.store(os, "Do not modify");
         }
+    }
+
+    private void createCITPack(Path minecraftFolderPath, Material itemMaterial) throws IOException {
+        Path textureFolderPath = resolve(minecraftFolderPath, "optifine", "cit", "tis");
+        Files.createDirectories(textureFolderPath);
+
+        Properties textureProp = new Properties();
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream("cit/diamond_nugget.properties")) {
+            if (is == null) {
+                throw new IllegalStateException("diamond_nugget.properties not found in resources!");
+            }
+            textureProp.load(is);
+        }
+        String materialName = itemMaterial.getKey().getKey();
+        textureProp.setProperty("items", materialName);
+        Path propPath = textureFolderPath.resolve("diamond_nugget.properties");
+        try (OutputStream os = Files.newOutputStream(propPath)) {
+            textureProp.store(os, null);
+        }
+
+        copyFromResources("diamond_nugget.png", textureFolderPath.resolve("diamond_nugget.png"));
+    }
+
+    private void createCustomModelPack(Path minecraftFolderPath, Material itemMaterial) throws IOException {
+        Path textureFolderPath = resolve(minecraftFolderPath, "textures", "item");
+        Files.createDirectories(textureFolderPath);
+
+        copyFromResources("diamond_nugget.png", textureFolderPath.resolve("diamond_nugget.png"));
+
+        Path modelFolderPath = resolve(minecraftFolderPath, "models", "item");
+        Files.createDirectories(modelFolderPath);
+
+        copyFromResources("model/diamond_nugget.json", modelFolderPath.resolve("diamond_nugget.json"));
+
+        String itemJsonStr = readFromResources("model/item.json");
+        JsonObject itemJson = new JsonParser().parse(itemJsonStr).getAsJsonObject();
+        String materialName = itemMaterial.getKey().getKey().toLowerCase(Locale.ROOT);
+        String layer0 = "item/" + materialName;
+        itemJson.getAsJsonObject("textures").addProperty("layer0", layer0);
+
+        itemJson.getAsJsonArray("overrides")
+                .get(0).getAsJsonObject()
+                .getAsJsonObject("predicate").addProperty("custom_model_data", config.customModelData);
+
+        String itemJsonStrOutput = new GsonBuilder().setPrettyPrinting().create().toJson(itemJson);
+        Files.write(modelFolderPath.resolve(materialName + ".json"), itemJsonStrOutput.getBytes());
+    }
+
+    private int getPackFormat() {
+        if (config.shouldUseServerPackFormat()) {
+            return SpigotVersion.SERVER_VERSION.packFormat;
+        }
+        return config.packFormat;
     }
 
     private static Path resolve(Path path, String... directoryNames) {
@@ -175,10 +229,10 @@ public class PackCreator {
         }
     }
 
-    private Path getZipPath(Path dataPath, String itemName) {
+    private static Path getZipPath(Path dataPath, String itemName) {
         return dataPath.resolve(sanitizeFilename(itemName, "pack") + ".zip");
     }
-    private String sanitizeFilename(String name, String alternate) {
+    private static String sanitizeFilename(String name, String alternate) {
         String sanitized = ILLEGAL_FILE_CHARS.matcher(name).replaceAll("");
         // Use alternate filename in case sanitize deletes all characters or creates a windows reserved file
         if (sanitized.isEmpty() || ILLEGAL_FILE_NAMES.matcher(sanitized).matches()) {
@@ -187,7 +241,7 @@ public class PackCreator {
         return sanitized;
     }
     // Adapted from https://stackoverflow.com/a/32052016
-    private void zip(Path sourcePath, Path targetPath) throws IOException {
+    private static void zip(Path sourcePath, Path targetPath) throws IOException {
         if (Files.exists(targetPath)) {
             Files.delete(targetPath);
         }
@@ -198,7 +252,7 @@ public class PackCreator {
                     .forEach(path -> addZipEntry(sourcePath, zs, path));
         }
     }
-    private void addZipEntry(Path sourcePath, ZipOutputStream zs, Path path) {
+    private static void addZipEntry(Path sourcePath, ZipOutputStream zs, Path path) {
         ZipEntry zipEntry = new ZipEntry(sourcePath.relativize(path).toString());
         try {
             zs.putNextEntry(zipEntry);

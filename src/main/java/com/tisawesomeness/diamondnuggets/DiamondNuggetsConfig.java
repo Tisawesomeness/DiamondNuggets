@@ -5,6 +5,8 @@ import org.bukkit.configuration.file.FileConfiguration;
 
 public class DiamondNuggetsConfig {
 
+    private static final int CUSTOM_MODEL_DATA = 5648554;
+
     private final DiamondNuggets plugin;
 
     /** Null if invalid */
@@ -21,8 +23,17 @@ public class DiamondNuggetsConfig {
     public final String renameDisabledMessage;
     public final boolean preventCrafting;
     public final boolean preventPlacement;
+    /** -1 to use Optifine / CIT Resewn method instead */
+    public final int customModelData;
     /** -1 to use server default */
     public final int packFormat;
+
+    public static void saveBrandNewConfig(DiamondNuggets plugin) {
+        plugin.saveDefaultConfig();
+        FileConfiguration conf = plugin.getConfig();
+        conf.set("custom-model-data", CUSTOM_MODEL_DATA);
+        plugin.saveConfig();
+    }
 
     public DiamondNuggetsConfig(DiamondNuggets plugin) {
         this.plugin = plugin;
@@ -36,6 +47,7 @@ public class DiamondNuggetsConfig {
         renameDisabledMessage = conf.getString("rename-disabled-message");
         preventCrafting = conf.getBoolean("prevent-crafting");
         preventPlacement = conf.getBoolean("prevent-placement");
+        customModelData = conf.getInt("custom-model-data", -1);
         packFormat = conf.getInt("pack-format");
     }
 
@@ -94,6 +106,9 @@ public class DiamondNuggetsConfig {
     }
     public boolean isNuggetsToDiamondValid() {
         return 1 <= nuggetsToDiamond && nuggetsToDiamond <= 9;
+    }
+    public boolean shouldUseCustomModelData() {
+        return customModelData != -1;
     }
     public boolean shouldUseServerPackFormat() {
         return packFormat == -1;

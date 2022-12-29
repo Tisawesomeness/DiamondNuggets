@@ -9,6 +9,6 @@ This simple plugin adds two recipes to aid players creating item shops. Players 
 
 You can customize the amount of nuggets crafted from a diamond, the item name and material (so you can change diamond nuggets to amethyst crystals named "Diamond Shards" if you want), and whether to prevent renames.
 
-The plugin will generate the resource pack ([Optifine](https://optifine.net/home) or [CIT Resewn](https://www.curseforge.com/minecraft/mc-mods/cit-resewn) required) used in the above screenshots and put it in the plugin folder. If players do not have the resource pack, diamond nuggets will appear as golden nuggets (or a different item if changed in the config).
+The plugin will generate the resource pack used in the above screenshots and put it in the plugin folder. If players do not have the resource pack, diamond nuggets will appear as golden nuggets (or a different item if changed in the config).
 
 WARNING: This plugin is meant for fairly vanilla servers. If you want more robust recipe configuration or protection against glitches/exploits from other plugins, consider using a dedicated custom recipe or custom item plugin.

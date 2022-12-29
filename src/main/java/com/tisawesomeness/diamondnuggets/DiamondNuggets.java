@@ -40,14 +40,19 @@ public class DiamondNuggets extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        saveDefaultConfig();
-        getConfig().options().copyDefaults(true);
-        try {
-            ConfigUpdater.update(this, "config.yml", new File(getDataFolder(), "config.yml"));
-        } catch (IOException e) {
-            e.printStackTrace();
+        File configFile = new File(getDataFolder(), "config.yml");
+        boolean exists = configFile.exists();
+        if (exists) {
+            getConfig().options().copyDefaults(true);
+            try {
+                ConfigUpdater.update(this, "config.yml", configFile);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            reloadConfig();
+        } else {
+            DiamondNuggetsConfig.saveBrandNewConfig(this);
         }
-        reloadConfig();
 
         config = new DiamondNuggetsConfig(this);
         if (!config.isValid()) {
@@ -108,6 +113,9 @@ public class DiamondNuggets extends JavaPlugin {
         meta.setDisplayName(config.itemName);
         meta.setUnbreakable(true); // unbreakable flag prevents cheating with enchants
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_UNBREAKABLE);
+        if (config.shouldUseCustomModelData()) {
+            meta.setCustomModelData(config.customModelData);
+        }
         nugget.setItemMeta(meta);
         return nugget;
     }
