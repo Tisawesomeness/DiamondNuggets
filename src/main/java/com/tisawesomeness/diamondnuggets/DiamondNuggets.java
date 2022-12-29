@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.List;
 
 public class DiamondNuggets extends JavaPlugin {
 
@@ -113,6 +114,12 @@ public class DiamondNuggets extends JavaPlugin {
         assert meta != null;
         assert config.itemName != null;
         meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', config.itemName));
+        if (config.itemLore) {
+            List<String> lore = config.loreLines.stream()
+                    .map(s -> ChatColor.translateAlternateColorCodes('&', s))
+                    .toList();
+            meta.setLore(lore);
+        }
         meta.setUnbreakable(true); // unbreakable flag prevents cheating with enchants
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_UNBREAKABLE);
         if (config.shouldUseCustomModelData()) {

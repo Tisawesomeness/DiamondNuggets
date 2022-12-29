@@ -8,6 +8,14 @@
 # unless the player renames the nuggets back to the new name
 item-name: "&fDiamond Nugget"
 
+# The lore of the diamond nugget item
+# & codes supported
+# Changing the lore will make existing nuggets unable to be combined back into a diamond
+item-lore: false
+lore-lines:
+  - "&rLore line 1"
+  - "&rLore line 2"
+
 # The nugget material used to represent diamond nuggets, cannot be air or an unstackable item
 # Changing the material will make existing nuggets unable to be combined back into a diamond
 #

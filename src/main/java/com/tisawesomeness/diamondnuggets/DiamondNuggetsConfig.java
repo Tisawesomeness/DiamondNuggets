@@ -3,6 +3,9 @@ package com.tisawesomeness.diamondnuggets;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 
+import java.util.Collections;
+import java.util.List;
+
 public class DiamondNuggetsConfig {
 
     private static final int CUSTOM_MODEL_DATA = 5648554;
@@ -11,6 +14,9 @@ public class DiamondNuggetsConfig {
 
     /** Null if invalid */
     public final String itemName;
+    public final boolean itemLore;
+    /** Empty if lore disabled or invalid */
+    public final List<String> loreLines;
     /** Null if invalid */
     public final Material itemMaterial;
     /** Valid if between 1 and 9, -1 if invalid */
@@ -39,6 +45,8 @@ public class DiamondNuggetsConfig {
         this.plugin = plugin;
         FileConfiguration conf = plugin.getConfig();
         itemName = checkItemName(conf.getString("item-name"));
+        itemLore = conf.getBoolean("item-lore");
+        loreLines = checkLoreLines(itemLore, conf.getStringList("lore-lines"));
         itemMaterial = getNuggetMaterial(conf.getString("item-material"));
         nuggetsToDiamond = checkNuggetsToDiamond(conf.getInt("nuggets-to-diamond"));
         recipeBookCategory = conf.getString("recipe-book-category", "MISC");
@@ -65,6 +73,21 @@ public class DiamondNuggetsConfig {
             return null;
         }
         return name;
+    }
+
+    private List<String> checkLoreLines(boolean itemLore, List<String> loreLines) {
+        if (!itemLore) {
+            return Collections.emptyList();
+        }
+        if (loreLines == null) {
+            plugin.err("Lore lines were missing from the config!");
+            return Collections.emptyList();
+        }
+        if (loreLines.isEmpty()) {
+            plugin.err("Lore lines cannot be empty!");
+            return Collections.emptyList();
+        }
+        return loreLines;
     }
 
     private Material getNuggetMaterial(String name) {
