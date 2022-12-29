@@ -3,6 +3,7 @@ package com.tisawesomeness.diamondnuggets;
 import com.tisawesomeness.diamondnuggets.listen.*;
 
 import com.tchristofferson.configupdater.ConfigUpdater;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
@@ -110,7 +111,8 @@ public class DiamondNuggets extends JavaPlugin {
         nugget.addUnsafeEnchantment(Enchantment.LOOT_BONUS_BLOCKS, Enchantment.LOOT_BONUS_BLOCKS.getMaxLevel());
         ItemMeta meta = nugget.getItemMeta();
         assert meta != null;
-        meta.setDisplayName(config.itemName);
+        assert config.itemName != null;
+        meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', config.itemName));
         meta.setUnbreakable(true); // unbreakable flag prevents cheating with enchants
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_UNBREAKABLE);
         if (config.shouldUseCustomModelData()) {

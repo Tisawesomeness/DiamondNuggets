@@ -3,14 +3,15 @@
 # from other plugins, consider using a dedicated custom recipe or custom item plugin.
 
 # The name of the diamond nugget item, must be 1-50 characters
+# & codes supported, see https://minecraft.fandom.com/wiki/Formatting_codes for a list
 # Changing the name will make existing nuggets unable to be combined back into a diamond
 # unless the player renames the nuggets back to the new name
-item-name: "Diamond Nugget"
+item-name: "&fDiamond Nugget"
 
 # The nugget material used to represent diamond nuggets, cannot be air or an unstackable item
 # Changing the material will make existing nuggets unable to be combined back into a diamond
 #
-# Nugget items cannot be accidentally placed, used by right clicking, or used in crafting except for:
+# Nugget items cannot be accidentally placed, used by right-clicking, or used in crafting except for:
 # - Powering a beacon
 # - Using an item as a brewing stand ingredient
 # - Fueling a brewing stand with blaze powder
