@@ -2,6 +2,8 @@ package com.tisawesomeness.diamondnuggets;
 
 import com.google.gson.*;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.enchantments.Enchantment;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -9,6 +11,7 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 public class PackCreator {
 
@@ -55,16 +58,24 @@ public class PackCreator {
                 return true;
             }
 
+            String storedPluginVersion = packProp.getProperty("plugin-version");
+            if (!pluginVersion.equals(storedPluginVersion)) {
+                Files.delete(packPath);
+                return true;
+            }
+
             String storedItemMaterial = packProp.getProperty("item-material");
             if (storedItemMaterial == null || Material.matchMaterial(storedItemMaterial) != itemMaterial) {
                 Files.delete(packPath);
                 return true;
             }
 
-            String storedPluginVersion = packProp.getProperty("plugin-version");
-            if (!pluginVersion.equals(storedPluginVersion)) {
-                Files.delete(packPath);
-                return true;
+            if (!config.shouldUseCustomModelData()) {
+                String storedItemEnchants = packProp.getProperty("item-enchants");
+                if (!buildEnchantsString().equals(storedItemEnchants)) {
+                    Files.delete(packPath);
+                    return true;
+                }
             }
 
             String storedCustomModelData = packProp.getProperty("custom-model-data");
@@ -122,9 +133,10 @@ public class PackCreator {
         IO.zip(packFolderPath, getZipPath(dataPath, itemName));
 
         Properties packProp = new Properties();
+        packProp.setProperty("plugin-version", pluginVersion);
         packProp.setProperty("item-name", itemName);
         packProp.setProperty("item-material", materialName);
-        packProp.setProperty("plugin-version", pluginVersion);
+        packProp.setProperty("item-enchants", buildEnchantsString());
         packProp.setProperty("custom-model-data", String.valueOf(config.customModelData));
         packProp.setProperty("pack-format", String.valueOf(packFormat));
         try (OutputStream os = Files.newOutputStream(packDataPath)) {
@@ -136,15 +148,10 @@ public class PackCreator {
         Path textureFolderPath = IO.resolve(minecraftFolderPath, "optifine", "cit", "tis");
         Files.createDirectories(textureFolderPath);
 
-        Properties textureProp = new Properties();
-        try (InputStream is = getClass().getClassLoader().getResourceAsStream("cit/diamond_nugget.properties")) {
-            if (is == null) {
-                throw new IllegalStateException("diamond_nugget.properties not found in resources!");
-            }
-            textureProp.load(is);
-        }
+        Properties textureProp = IO.readPropertiesFromResources("cit/diamond_nugget.properties");
         String materialName = itemMaterial.getKey().getKey();
         textureProp.setProperty("items", materialName);
+        textureProp.setProperty("enchantments", buildEnchantsString());
         Path propPath = textureFolderPath.resolve("diamond_nugget.properties");
         try (OutputStream os = Files.newOutputStream(propPath)) {
             textureProp.store(os, null);
@@ -183,6 +190,14 @@ public class PackCreator {
             return SpigotVersion.SERVER_VERSION.packFormat;
         }
         return config.packFormat;
+    }
+
+    private String buildEnchantsString() {
+        return config.itemEnchants.stream()
+                .map(EnchantmentLevel::enchantment)
+                .map(Enchantment::getKey)
+                .map(NamespacedKey::getKey)
+                .collect(Collectors.joining(" "));
     }
 
     private static Path getZipPath(Path dataPath, String itemName) {

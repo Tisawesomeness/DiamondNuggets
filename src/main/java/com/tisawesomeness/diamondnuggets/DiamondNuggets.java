@@ -3,15 +3,12 @@ package com.tisawesomeness.diamondnuggets;
 import com.tisawesomeness.diamondnuggets.listen.*;
 
 import com.tchristofferson.configupdater.ConfigUpdater;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.*;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -19,7 +16,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.List;
 
 public class DiamondNuggets extends JavaPlugin {
 
@@ -61,17 +57,23 @@ public class DiamondNuggets extends JavaPlugin {
             return;
         }
 
-        nugget = initNugget(config.itemMaterial);
+        nugget = Nugget.createNugget(config);
 
-        try {
-            PackCreator packCreator = new PackCreator(this);
-            if (packCreator.createPackIfNeeded(config.itemName, config.itemMaterial)) {
-                log("Resource pack created");
-            } else {
-                log("Resource pack already exists");
+        if (!config.itemEnchanted && !config.shouldUseCustomModelData()) {
+            // Can't generate a pack using the CIT method if the item has no enchants to separate it from other items
+            err("Cannot generate CIT resource pack if item has no enchants.\n" +
+                    "Please set `itemEnchanted` to true or use `customModelData`.");
+        } else {
+            try {
+                PackCreator packCreator = new PackCreator(this);
+                if (packCreator.createPackIfNeeded(config.itemName, config.itemMaterial)) {
+                    log("Resource pack created");
+                } else {
+                    log("Resource pack already exists");
+                }
+            } catch (IOException e) {
+                err(e);
             }
-        } catch (IOException e) {
-            err(e);
         }
 
         // Don't add recipe if amount of nuggets is invalid
@@ -105,28 +107,6 @@ public class DiamondNuggets extends JavaPlugin {
             man.registerEvents(new InventoryDenyListener(this, InventoryType.ANVIL, true, 0, 1), this);
         }
         man.registerEvents(new InventoryDenyListener(this, InventoryType.GRINDSTONE, 0, 1), this);
-    }
-
-    private ItemStack initNugget(Material nuggetMat) {
-        ItemStack nugget = new ItemStack(nuggetMat);
-        nugget.addUnsafeEnchantment(Enchantment.LOOT_BONUS_BLOCKS, Enchantment.LOOT_BONUS_BLOCKS.getMaxLevel());
-        ItemMeta meta = nugget.getItemMeta();
-        assert meta != null;
-        assert config.itemName != null;
-        meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', config.itemName));
-        if (config.itemLore) {
-            List<String> lore = config.loreLines.stream()
-                    .map(s -> ChatColor.translateAlternateColorCodes('&', s))
-                    .toList();
-            meta.setLore(lore);
-        }
-        meta.setUnbreakable(true); // unbreakable flag prevents cheating with enchants
-        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_UNBREAKABLE);
-        if (config.shouldUseCustomModelData()) {
-            meta.setCustomModelData(config.customModelData);
-        }
-        nugget.setItemMeta(meta);
-        return nugget;
     }
 
     // Known bug: recipe book doesn't autofill custom items

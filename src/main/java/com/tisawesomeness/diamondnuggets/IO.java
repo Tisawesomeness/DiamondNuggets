@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Properties;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
@@ -18,15 +19,25 @@ public final class IO {
             "^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$", Pattern.CASE_INSENSITIVE);
 
     public static String readFromResources(String resource) throws IOException {
-        try (InputStream is = PackCreator.class.getClassLoader().getResourceAsStream(resource)) {
+        try (InputStream is = IO.class.getClassLoader().getResourceAsStream(resource)) {
             if (is == null) {
                 throw new IllegalStateException(resource + " not found in resources!");
             }
             return new String(is.readAllBytes());
         }
     }
+    public static Properties readPropertiesFromResources(String resource) throws IOException {
+        Properties prop = new Properties();
+        try (InputStream is = IO.class.getClassLoader().getResourceAsStream(resource)) {
+            if (is == null) {
+                throw new IllegalStateException(resource + " not found in resources!");
+            }
+            prop.load(is);
+        }
+        return prop;
+    }
     public static void copyFromResources(String resource, Path targetPath) throws IOException {
-        try (InputStream is = PackCreator.class.getClassLoader().getResourceAsStream(resource)) {
+        try (InputStream is = IO.class.getClassLoader().getResourceAsStream(resource)) {
             if (is == null) {
                 throw new IllegalStateException(resource + " not found in resources!");
             }
