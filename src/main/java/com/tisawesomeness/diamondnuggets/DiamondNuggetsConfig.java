@@ -4,6 +4,7 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemFlag;
 
 import java.util.Collections;
 import java.util.List;
@@ -27,6 +28,10 @@ public class DiamondNuggetsConfig {
     public final boolean itemEnchanted;
     /** Empty if enchants disabled or invalid */
     public final List<EnchantmentLevel> itemEnchants;
+
+    public final boolean itemFlagged;
+    /** Empty if flags disabled or invalid */
+    public final List<ItemFlag> itemFlags;
 
     /** Valid if between 1 and 9, -1 if invalid */
     public final int nuggetsToDiamond;
@@ -66,6 +71,9 @@ public class DiamondNuggetsConfig {
 
         itemEnchanted = conf.getBoolean("item-enchanted");
         itemEnchants = checkEnchants(itemEnchanted, conf.getStringList("item-enchants"));
+
+        itemFlagged = conf.getBoolean("item-flagged");
+        itemFlags = checkFlags(itemFlagged, conf.getStringList("item-flags"));
 
         nuggetsToDiamond = checkNuggetsToDiamond(conf.getInt("nuggets-to-diamond"));
         recipeBookCategory = conf.getString("recipe-book-category", "MISC");
@@ -172,6 +180,31 @@ public class DiamondNuggetsConfig {
             return null;
         }
         return new EnchantmentLevel(enchantment, level);
+    }
+
+    private List<ItemFlag> checkFlags(boolean itemFlagged, List<String> itemFlags) {
+        if (!itemFlagged) {
+            return Collections.emptyList();
+        }
+        if (itemFlags == null) {
+            plugin.err("Item flags were missing from the config!");
+            return Collections.emptyList();
+        }
+        List<ItemFlag> flags = itemFlags.stream()
+                .map(this::parseItemFlag)
+                .toList();
+        if (flags.contains(null)) {
+            return Collections.emptyList();
+        }
+        return flags;
+    }
+    private ItemFlag parseItemFlag(String str) {
+        try {
+            return ItemFlag.valueOf(str);
+        } catch (IllegalArgumentException e) {
+            plugin.err(String.format("\"%s\" is not a valid item flag", str));
+            return null;
+        }
     }
 
     private int checkNuggetsToDiamond(int n) {

@@ -42,6 +42,15 @@ item-enchanted: true
 item-enchants:
   - "fortune:1"
 
+# A list of item flags used to hide the item's attributes
+# See https://hub.spigotmc.org/javadocs/spigot/org/bukkit/inventory/ItemFlag.html for a list
+# The nugget item is unbreakable, so HIDE_UNBREAKABLE recommended
+# Changing the flags will make existing nuggets unable to be combined back into a diamond
+item-flagged: true
+item-flags:
+  - HIDE_ENCHANTS
+  - HIDE_UNBREAKABLE
+
 # The amount of nuggets needed to craft a diamond
 # Must be between 1-9, 4 or 9 is recommended
 # 1-4 nuggets will fit in the 2x2 crafting grid

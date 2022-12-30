@@ -28,8 +28,10 @@ public class Nugget {
             meta.addEnchant(enchant.enchantment(), enchant.level(), true);
         }
 
-        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_UNBREAKABLE);
-        meta.setUnbreakable(true); // unbreakable flag prevents cheating with enchants
+        for (ItemFlag flag : config.itemFlags) {
+            meta.addItemFlags(flag);
+        }
+        meta.setUnbreakable(true); // unbreakable flag prevents cheating by replicating the item in survival
 
         if (config.shouldUseCustomModelData()) {
             meta.setCustomModelData(config.customModelData);
