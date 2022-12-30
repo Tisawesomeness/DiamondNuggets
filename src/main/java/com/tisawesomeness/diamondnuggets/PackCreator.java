@@ -1,6 +1,7 @@
 package com.tisawesomeness.diamondnuggets;
 
 import com.google.gson.*;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
@@ -201,7 +202,8 @@ public class PackCreator {
     }
 
     private static Path getZipPath(Path dataPath, String itemName) {
-        return dataPath.resolve(IO.sanitizeFilename(itemName, "pack") + ".zip");
+        String fileName = ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', itemName));
+        return dataPath.resolve(IO.sanitizeFilename(fileName, "pack") + ".zip");
     }
 
 }
