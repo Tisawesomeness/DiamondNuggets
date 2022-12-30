@@ -49,7 +49,7 @@ public class DiamondNuggets extends JavaPlugin {
             try {
                 ConfigUpdater.update(this, "config.yml", configFile);
             } catch (IOException e) {
-                e.printStackTrace();
+                err(e);
             }
             reloadConfig();
         } else {
@@ -167,7 +167,7 @@ public class DiamondNuggets extends JavaPlugin {
             }
             recipe.getClass().getMethod("setCategory", categoryClass).invoke(recipe, category);
         } catch (ReflectiveOperationException e) {
-            e.printStackTrace();
+            err(e);
         }
     }
     private Object findRecipeBookCategory(Class<?> categoryClass) {
