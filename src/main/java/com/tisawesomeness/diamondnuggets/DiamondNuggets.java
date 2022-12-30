@@ -38,6 +38,7 @@ public class DiamondNuggets extends JavaPlugin {
 
     @Override
     public void onEnable() {
+
         File configFile = new File(getDataFolder(), "config.yml");
         boolean exists = configFile.exists();
         if (exists) {
@@ -58,23 +59,6 @@ public class DiamondNuggets extends JavaPlugin {
         }
 
         nugget = Nugget.createNugget(config);
-
-        if (!config.itemEnchanted && !config.shouldUseCustomModelData()) {
-            // Can't generate a pack using the CIT method if the item has no enchants to separate it from other items
-            err("Cannot generate CIT resource pack if item has no enchants.\n" +
-                    "Please set `itemEnchanted` to true or use `customModelData`.");
-        } else {
-            try {
-                PackCreator packCreator = new PackCreator(this);
-                if (packCreator.createPackIfNeeded(config.itemName, config.itemMaterial)) {
-                    log("Resource pack created");
-                } else {
-                    log("Resource pack already exists");
-                }
-            } catch (IOException e) {
-                err(e);
-            }
-        }
 
         // Don't add recipe if amount of nuggets is invalid
         if (config.isNuggetsToDiamondValid()) {
@@ -107,6 +91,28 @@ public class DiamondNuggets extends JavaPlugin {
             man.registerEvents(new InventoryDenyListener(this, InventoryType.ANVIL, true, 0, 1), this);
         }
         man.registerEvents(new InventoryDenyListener(this, InventoryType.GRINDSTONE, 0, 1), this);
+
+        getServer().getScheduler().runTaskAsynchronously(this, this::generateResourcePack);
+
+    }
+
+    private void generateResourcePack() {
+        if (!config.itemEnchanted && !config.shouldUseCustomModelData()) {
+            // Can't generate a pack using the CIT method if the item has no enchants to separate it from other items
+            err("Cannot generate CIT resource pack if item has no enchants.\n" +
+                    "Please set `itemEnchanted` to true or use `customModelData`.");
+            return;
+        }
+        try {
+            PackCreator packCreator = new PackCreator(this);
+            if (packCreator.createPackIfNeeded(config.itemName, config.itemMaterial)) {
+                log("Resource pack created");
+            } else {
+                log("Resource pack already exists");
+            }
+        } catch (IOException e) {
+            err(e);
+        }
     }
 
     // Known bug: recipe book doesn't autofill custom items
