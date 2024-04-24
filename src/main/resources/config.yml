@@ -98,7 +98,7 @@ prevent-placement: false
 custom-model-data: -1
 
 # The pack format number put in pack.mcmeta when generating the diamond nugget resource pack.
-# Set to -1 to use the pack format number for the server's current version.
+# Set to -1 to use the pack format number for the plugin's current version.
 # If your server allows players to join with older versions, set this to the pack format for the oldest version.
 # See https://minecraft.fandom.com/wiki/Resource_pack#Pack_format
 pack-format: -1
