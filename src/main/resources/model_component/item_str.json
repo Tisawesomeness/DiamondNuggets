@@ -1,0 +1,19 @@
+{
+  "model": {
+    "type": "select",
+    "property": "custom_model_data",
+    "cases": [
+      {
+        "when": "{custom_model_data}",
+        "model": {
+          "type": "model",
+          "model": "tis:item/diamond_nugget"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "model",
+      "model": "item/{item}"
+    }
+  }
+}

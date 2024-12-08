@@ -94,11 +94,23 @@ prevent-placement: false
 # The custom model data ID to use for the nugget item.
 # This is used to give the item a unique model when using the resource pack.
 # Changing or disabling this value will make existing nuggets unable to be combined back into a diamond.
-# Set to -1 to disable. The pack will use the old method that requires Optifine or CIT Resewn.
+#
+# custom-model-data has 3 options:
+# - Set to a string in quotes ("").
+#     Only items with the exact same string will have the same texture.
+#     Requires 1.21.4 or later.
+# - Set to an integer without quotes.
+#     All items with a bigger or equal number will have the same texture (unless overridden by another custom model data).
+#     Equivalent to the behavior before 1.21.4.
+# - Set to -1 to disable.
+#     The resource pack will use the old method that requires Optifine or CIT Resewn.
 custom-model-data: -1
 
 # The pack format number put in pack.mcmeta when generating the diamond nugget resource pack.
 # Set to -1 to use the pack format number for the **plugin's** current version.
-# If your server allows players to join with older versions, set this to the pack format for the oldest version.
 # See https://minecraft.fandom.com/wiki/Resource_pack#Pack_format
+# If your server allows players to join with older versions, set this to the pack format for the oldest version.
+#
+# Note that if custom model data is enabled, resource packs generated in 1.21.4 and later are incompatible with
+# older clients. If this is the case, pack-format must be 46 or higher.
 pack-format: -1

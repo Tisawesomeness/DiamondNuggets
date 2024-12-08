@@ -12,11 +12,12 @@ public enum SpigotVersion {
     V1_19_3("1.19.3", 12),
     V1_19_4("1.19.4", 13),
     V1_20("1.20", 15),
-    V_1_20_2("1.20.2", 18),
-    V_1_20_3("1.20.3", 22),
-    V_1_20_5("1.20.5", 32),
-    V_1_21("1.21", 34),
-    V_1_21_2("1.21.2", 42);
+    V1_20_2("1.20.2", 18),
+    V1_20_3("1.20.3", 22),
+    V1_20_5("1.20.5", 32),
+    V1_21("1.21", 34),
+    V1_21_2("1.21.2", 42),
+    V1_21_4("1.21.4", 46);
 
     private final Version version;
     public final int packFormat;
@@ -56,6 +57,9 @@ public enum SpigotVersion {
 
     public boolean supportsRecipeBookCategory() {
         return compareTo(V1_19_3) >= 0;
+    }
+    public boolean supportsCustomModelDataComponent() {
+        return compareTo(V1_21_4) >= 0;
     }
 
     private record Version(int major, int minor, int patch) implements Comparable<Version> {

@@ -46,8 +46,8 @@ public class DiamondNuggetsConfig {
     public final boolean preventCrafting;
     public final boolean preventPlacement;
 
-    /** -1 to use Optifine / CIT Resewn method instead */
-    public final int customModelData;
+    /** Null to use Optifine / CIT Resewn method instead, -1 in config maps to null */
+    public final CustomModelData customModelData;
     /** -1 to use server default */
     public final int packFormat;
 
@@ -85,8 +85,8 @@ public class DiamondNuggetsConfig {
         preventCrafting = conf.getBoolean("prevent-crafting");
         preventPlacement = conf.getBoolean("prevent-placement");
 
-        customModelData = conf.getInt("custom-model-data", -1);
-        packFormat = conf.getInt("pack-format");
+        customModelData = checkCustomModelData(conf.getString("custom-model-data"));
+        packFormat = checkPackFormat(conf.getInt("pack-format"));
     }
 
     private String checkItemName(String name) {
@@ -219,6 +219,37 @@ public class DiamondNuggetsConfig {
         return n;
     }
 
+    private CustomModelData checkCustomModelData(String str) {
+        try {
+            int asInt = Integer.parseInt(str);
+            if (asInt == -1) {
+                return null;
+            }
+            return new CustomModelData.Int(asInt);
+        } catch (NumberFormatException ignored) {
+            if (!SpigotVersion.SERVER_VERSION.supportsCustomModelDataComponent()) {
+                plugin.err("custom-model-data must be an integer in server versions before 1.21.4.");
+                return null;
+            }
+            return new CustomModelData.Str(str);
+        }
+    }
+
+    private int checkPackFormat(int packFormat) {
+        if (packFormat < 0) {
+            return -1;
+        }
+        int cmdExpansionPackFormat = SpigotVersion.V1_21_4.packFormat;
+        if (shouldUseCustomModelData() &&
+                SpigotVersion.SERVER_VERSION.supportsCustomModelDataComponent() &&
+                packFormat < cmdExpansionPackFormat) {
+            plugin.err("Resource packs generated in 1.21.4 and later are incompatible with older clients. " +
+                    "Setting pack format to " + cmdExpansionPackFormat + ".");
+            return cmdExpansionPackFormat;
+        }
+        return packFormat;
+    }
+
     /** Whether the plugin can run with this config */
     public boolean isValid() {
         return itemName != null && itemMaterial != null;
@@ -227,7 +258,7 @@ public class DiamondNuggetsConfig {
         return 1 <= nuggetsToDiamond && nuggetsToDiamond <= 9;
     }
     public boolean shouldUseCustomModelData() {
-        return customModelData != -1;
+        return customModelData != null;
     }
     public boolean shouldUseServerPackFormat() {
         return packFormat == -1;

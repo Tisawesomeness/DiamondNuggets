@@ -2,14 +2,12 @@ package com.tisawesomeness.diamondnuggets;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 public final class IO {
     private IO() {}
@@ -74,31 +72,40 @@ public final class IO {
         return sanitized;
     }
 
-    // Adapted from https://stackoverflow.com/a/32052016
     public static void zip(Path sourcePath, Path targetPath) throws IOException {
         if (Files.exists(targetPath)) {
             Files.delete(targetPath);
         }
-        Files.createFile(targetPath);
-        try (ZipOutputStream zs = new ZipOutputStream(Files.newOutputStream(targetPath));
-             Stream<Path> paths = Files.walk(sourcePath)) {
-            paths.filter(path -> !Files.isDirectory(path))
-                    .forEach(path -> addZipEntry(sourcePath, zs, path));
-        } catch (RuntimeException e) {
-            if (e.getCause() instanceof IOException) {
-                throw (IOException) e.getCause();
-            }
-            throw e;
+        Map<String, String> env = new HashMap<>();
+        env.put("create", "true");
+        try (FileSystem zipfs = FileSystems.newFileSystem(targetPath, env)) {
+            copyRecursive(sourcePath, zipfs.getPath("/"));
         }
     }
-    private static void addZipEntry(Path sourcePath, ZipOutputStream zs, Path path) {
-        ZipEntry zipEntry = new ZipEntry(sourcePath.relativize(path).toString());
-        try {
-            zs.putNextEntry(zipEntry);
-            Files.copy(path, zs);
-            zs.closeEntry();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+
+    // Adapted from https://stackoverflow.com/a/60621544
+    private static void copyRecursive(Path sourcePath, Path targetPath) throws IOException {
+        Files.walkFileTree(sourcePath, new CopyVisitor(sourcePath, targetPath));
+    }
+
+    private static class CopyVisitor extends SimpleFileVisitor<Path> {
+        private final Path source;
+        private final Path target;
+        public CopyVisitor(Path source, Path target) {
+            this.source = source;
+            this.target = target;
+        }
+
+        @Override
+        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+            Files.createDirectories(target.resolve(source.relativize(dir).toString()));
+            return FileVisitResult.CONTINUE;
+        }
+
+        @Override
+        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+            Files.copy(file, target.resolve(source.relativize(file).toString()));
+            return FileVisitResult.CONTINUE;
         }
     }
 

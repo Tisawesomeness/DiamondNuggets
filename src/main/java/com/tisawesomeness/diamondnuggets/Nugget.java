@@ -34,7 +34,7 @@ public class Nugget {
         meta.setUnbreakable(true); // unbreakable flag prevents cheating by replicating the item in survival
 
         if (config.shouldUseCustomModelData()) {
-            meta.setCustomModelData(config.customModelData);
+            config.customModelData.setFor(meta);
         }
 
         nugget.setItemMeta(meta);
