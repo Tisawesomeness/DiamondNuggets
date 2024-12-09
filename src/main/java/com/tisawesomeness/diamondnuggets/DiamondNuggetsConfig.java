@@ -89,6 +89,8 @@ public class DiamondNuggetsConfig {
 
         customModelData = checkCustomModelData(conf.getString("custom-model-data"));
         packFormat = checkPackFormat(conf.getInt("pack-format"));
+
+        validate();
     }
 
     private String checkItemName(String name) {
@@ -252,6 +254,12 @@ public class DiamondNuggetsConfig {
         return packFormat;
     }
 
+    private void validate() {
+        if (customModelData == null && !itemEnchanted) {
+            plugin.err("If plugin is using the CIT resource pack, the nugget item must have at least 1 enchant to work");
+        }
+    }
+
     /** Whether the plugin can run with this config */
     public boolean isValid() {
         return itemName != null && itemMaterial != null;
@@ -259,6 +267,7 @@ public class DiamondNuggetsConfig {
     public boolean isNuggetsToDiamondValid() {
         return 1 <= nuggetsToDiamond && nuggetsToDiamond <= 9;
     }
+
     public boolean shouldUseCustomModelData() {
         return customModelData != null;
     }

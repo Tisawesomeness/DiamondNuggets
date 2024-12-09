@@ -55,6 +55,7 @@ public class DiamondNuggets extends JavaPlugin {
 
         config = new DiamondNuggetsConfig(this);
         if (!config.isValid()) {
+            err("Config is invalid, exiting...");
             return;
         }
 
