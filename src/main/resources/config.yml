@@ -59,7 +59,7 @@ nuggets-to-diamond: 9
 
 # The recipe book category to put the recipes in
 # One of BUILDING, REDSTONE, EQUIPMENT, or MISC (default)
-# Only works from versions 1.19.3 and later
+# Only works in versions 1.19.3 and later
 recipe-book-category: MISC
 
 # Whether the recipes unlock on join (or plugin enable) regardless of what items the player has
@@ -104,7 +104,7 @@ prevent-placement: false
 #     Equivalent to the behavior before 1.21.4.
 # - Set to -1 to disable.
 #     The resource pack will use the old method that requires Optifine or CIT Resewn.
-custom-model-data: -1
+custom-model-data: "tis:diamond_nugget"
 
 # The pack format number put in pack.mcmeta when generating the diamond nugget resource pack.
 # Set to -1 to use the pack format number for the **plugin's** current version.

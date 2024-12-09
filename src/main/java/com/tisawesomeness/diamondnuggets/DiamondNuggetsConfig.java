@@ -54,7 +54,9 @@ public class DiamondNuggetsConfig {
     public static void saveBrandNewConfig(DiamondNuggets plugin) {
         plugin.saveDefaultConfig();
         FileConfiguration conf = plugin.getConfig();
-        conf.set("custom-model-data", CUSTOM_MODEL_DATA);
+        if (!SpigotVersion.SERVER_VERSION.supportsCustomModelDataComponent()) {
+            conf.set("custom-model-data", CUSTOM_MODEL_DATA);
+        }
         plugin.saveConfig();
     }
 

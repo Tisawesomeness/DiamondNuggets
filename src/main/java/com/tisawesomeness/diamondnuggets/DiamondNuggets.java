@@ -151,15 +151,17 @@ public class DiamondNuggets extends JavaPlugin {
                 err("Could not find recipe book category " + config.recipeBookCategory);
                 return;
             }
+            // recipe.setCategory(category)
             recipe.getClass().getMethod("setCategory", categoryClass).invoke(recipe, category);
         } catch (ReflectiveOperationException e) {
-            err(e);
+            throw new RuntimeException(e);
         }
     }
     private Object findRecipeBookCategory(Class<?> categoryClass) {
-        for (Object obj : categoryClass.getEnumConstants()) {
-            if (obj.toString().equalsIgnoreCase(config.recipeBookCategory)) {
-                return obj;
+        // for (CraftingBookCategory category : CraftingBookCategory.values())
+        for (Object category : categoryClass.getEnumConstants()) {
+            if (category.toString().equalsIgnoreCase(config.recipeBookCategory)) {
+                return category;
             }
         }
         return null;
