@@ -48,8 +48,8 @@ public class DiamondNuggetsConfig {
 
     /** Null to use Optifine / CIT Resewn method instead, -1 in config maps to null */
     public final CustomModelData customModelData;
-    /** -1 to use server default */
-    public final int packFormat;
+    /** Null to use server default */
+    public final PackFormat packFormat;
 
     public static void saveBrandNewConfig(DiamondNuggets plugin) {
         plugin.saveDefaultConfig();
@@ -88,7 +88,7 @@ public class DiamondNuggetsConfig {
         preventPlacement = conf.getBoolean("prevent-placement");
 
         customModelData = checkCustomModelData(conf.getString("custom-model-data"));
-        packFormat = checkPackFormat(conf.getInt("pack-format"));
+        packFormat = checkPackFormat(conf.getInt("pack-format"), conf.getInt("pack-format-minor"));
 
         validate();
     }
@@ -239,14 +239,19 @@ public class DiamondNuggetsConfig {
         }
     }
 
-    private int checkPackFormat(int packFormat) {
-        if (packFormat < 0) {
-            return -1;
+    private PackFormat checkPackFormat(int major, int minor) {
+        if (major < 0) {
+            return null;
         }
-        int cmdExpansionPackFormat = SpigotVersion.V1_21_4.packFormat;
+        if (minor < 0) {
+            plugin.err("pack-format-minor must be non-negative.");
+            return null;
+        }
+        PackFormat packFormat = new PackFormat(major, minor);
+        PackFormat cmdExpansionPackFormat = SpigotVersion.V1_21_4.packFormat;
         if (shouldUseCustomModelData() &&
                 SpigotVersion.SERVER_VERSION.supportsCustomModelDataComponent() &&
-                packFormat < cmdExpansionPackFormat) {
+                packFormat.compareTo(cmdExpansionPackFormat) < 0) {
             plugin.err("Resource packs generated in 1.21.4 and later are incompatible with older clients. " +
                     "Setting pack format to " + cmdExpansionPackFormat + ".");
             return cmdExpansionPackFormat;
@@ -272,7 +277,7 @@ public class DiamondNuggetsConfig {
         return customModelData != null;
     }
     public boolean shouldUseServerPackFormat() {
-        return packFormat == -1;
+        return packFormat == null;
     }
 
 }

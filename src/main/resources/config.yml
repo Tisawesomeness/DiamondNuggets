@@ -106,7 +106,7 @@ prevent-placement: false
 #     The resource pack will use the old method that requires Optifine or CIT Resewn.
 custom-model-data: "tis:diamond_nugget"
 
-# The pack format number put in pack.mcmeta when generating the diamond nugget resource pack.
+# The minimum pack format number put in pack.mcmeta when generating the diamond nugget resource pack.
 # Set to -1 to use the pack format number for the **plugin's** current version.
 # See https://minecraft.fandom.com/wiki/Resource_pack#Pack_format
 # If your server allows players to join with older versions, set this to the pack format for the oldest version.
@@ -114,3 +114,5 @@ custom-model-data: "tis:diamond_nugget"
 # Note that if custom model data is enabled, resource packs generated in 1.21.4 and later are incompatible with
 # older clients. If this is the case, pack-format must be 46 or higher.
 pack-format: -1
+# The pack minor version put in pack.mcmeta
+pack-format-minor: 0

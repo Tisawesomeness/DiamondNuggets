@@ -86,7 +86,7 @@ public class PackCreator {
             }
 
             String storedPackFormat = packProp.getProperty("pack-format");
-            if (!String.valueOf(getPackFormat()).equals(storedPackFormat)) {
+            if (!getPackFormat().toString().equals(storedPackFormat)) {
                 Files.delete(packPath);
                 return true;
             }
@@ -123,12 +123,21 @@ public class PackCreator {
         IO.copyFromResources("diamond_nugget.png", packFolderPath.resolve("pack.png"));
 
         String materialName = itemMaterial.getKey().getKey();
-        int packFormat = getPackFormat();
 
+        PackFormat packFormat = getPackFormat();
         String packMeta = IO.readFromResources("pack.mcmeta");
         JsonObject packMetaJson = new JsonParser().parse(packMeta).getAsJsonObject();
         JsonObject packMetaJsonPack = packMetaJson.getAsJsonObject("pack");
-        packMetaJsonPack.addProperty("pack_format", packFormat);
+        if (SpigotVersion.SERVER_VERSION.supportsPackMinorVersion()) {
+            JsonArray packFormatArray = new JsonArray();
+            packFormatArray.add(packFormat.major());
+            packFormatArray.add(packFormat.minor());
+            packMetaJsonPack.add("min_format", packFormatArray);
+            packMetaJsonPack.addProperty("max_format", packFormat.major());
+        } else {
+            packMetaJsonPack.addProperty("pack_format", packFormat.major());
+        }
+
         if (!config.shouldUseCustomModelData()) {
             String description = packMetaJsonPack.get("description").getAsString();
             String newDescription = description + "\n§4Optifine/CIT Resewn required";
@@ -145,7 +154,7 @@ public class PackCreator {
         packProp.setProperty("item-material", materialName);
         packProp.setProperty("item-enchants", buildEnchantsString());
         packProp.setProperty("custom-model-data", config.customModelData.toString());
-        packProp.setProperty("pack-format", String.valueOf(packFormat));
+        packProp.setProperty("pack-format", packFormat.toString());
         try (OutputStream os = Files.newOutputStream(packDataPath)) {
             packProp.store(os, "Do not modify");
         }
@@ -240,7 +249,7 @@ public class PackCreator {
         return itemJson;
     }
 
-    private int getPackFormat() {
+    private PackFormat getPackFormat() {
         if (config.shouldUseServerPackFormat()) {
             return SpigotVersion.SERVER_VERSION.packFormat;
         }

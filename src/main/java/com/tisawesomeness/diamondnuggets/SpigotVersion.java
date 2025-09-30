@@ -20,26 +20,32 @@ public enum SpigotVersion {
     V1_21_4("1.21.4", 46),
     V1_21_5("1.21.5", 55),
     V1_21_6("1.21.6", 63),
-    V1_21_7("1.21.7", 64);
+    V1_21_7("1.21.7", 64),
+    V1_21_9("1.21.9", 69);
 
     private final Version version;
-    public final int packFormat;
+    public final PackFormat packFormat;
+
     SpigotVersion(String version, int packFormat) {
         this.version = Version.parse(version);
-        this.packFormat = packFormat;
+        this.packFormat = new PackFormat(packFormat, 0);
+    }
+    SpigotVersion(String version, int packMajor, int packMinor) {
+        this.version = Version.parse(version);
+        this.packFormat = new PackFormat(packMajor, packMinor);
     }
 
     public static final SpigotVersion SERVER_VERSION = initVersion();
 
     private static SpigotVersion initVersion() {
         String bukkitVersion = Bukkit.getServer().getBukkitVersion();
-        SpigotVersion version = findLatestPackVersion(bukkitVersion);
+        SpigotVersion version = findLatestVersion(bukkitVersion);
         if (version == null) {
             throw new IllegalStateException("Unsupported Spigot version: " + bukkitVersion);
         }
         return version;
     }
-    public static SpigotVersion findLatestPackVersion(String version) {
+    private static SpigotVersion findLatestVersion(String version) {
         int idx = version.indexOf('-');
         if (idx == -1) {
             return null;
@@ -63,6 +69,9 @@ public enum SpigotVersion {
     }
     public boolean supportsCustomModelDataComponent() {
         return compareTo(V1_21_4) >= 0;
+    }
+    public boolean supportsPackMinorVersion() {
+        return compareTo(V1_21_9) >= 0;
     }
 
     private record Version(int major, int minor, int patch) implements Comparable<Version> {
