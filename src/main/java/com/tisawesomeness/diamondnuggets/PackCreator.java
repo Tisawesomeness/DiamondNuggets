@@ -19,11 +19,13 @@ public class PackCreator {
     private final Path dataPath;
     private final String pluginVersion;
     private final DiamondNuggetsConfig config;
+    private final SpigotVersion spigotVersion;
 
     public PackCreator(DiamondNuggets plugin) {
         dataPath = plugin.getDataFolder().toPath();
         pluginVersion = plugin.getDescription().getVersion();
-        config = plugin.config;
+        config = plugin.getDNConfig();
+        spigotVersion = plugin.getVersion();
     }
 
     public boolean createPackIfNeeded(String itemName, Material itemMaterial) throws IOException {
@@ -110,7 +112,7 @@ public class PackCreator {
 
         if (config.shouldUseCustomModelData()) {
             CustomModelData customModelData = config.customModelData;
-            if (SpigotVersion.SERVER_VERSION.supportsCustomModelDataComponent()) {
+            if (spigotVersion.supportsCustomModelDataComponent()) {
                 createCustomModelComponentPack(assetsFolderPath, itemMaterial, customModelData);
             } else {
                 int data = ((CustomModelData.Int) customModelData).data();
@@ -128,7 +130,7 @@ public class PackCreator {
         String packMeta = IO.readFromResources("pack.mcmeta");
         JsonObject packMetaJson = new JsonParser().parse(packMeta).getAsJsonObject();
         JsonObject packMetaJsonPack = packMetaJson.getAsJsonObject("pack");
-        if (SpigotVersion.SERVER_VERSION.supportsPackMinorVersion()) {
+        if (spigotVersion.supportsPackMinorVersion()) {
             JsonArray packFormatArray = new JsonArray();
             packFormatArray.add(packFormat.major());
             packFormatArray.add(packFormat.minor());
@@ -251,7 +253,7 @@ public class PackCreator {
 
     private PackFormat getPackFormat() {
         if (config.shouldUseServerPackFormat()) {
-            return SpigotVersion.SERVER_VERSION.packFormat;
+            return spigotVersion.packFormat;
         }
         return config.packFormat;
     }

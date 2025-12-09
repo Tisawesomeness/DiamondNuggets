@@ -20,7 +20,7 @@ repositories {
 
 dependencies {
     compileOnly 'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT'
-    implementation 'com.tchristofferson:ConfigUpdater:2.0-SNAPSHOT'
+    implementation 'com.tchristofferson:ConfigUpdater:2.2'
 }
 
 def targetJavaVersion = 16

@@ -18,7 +18,7 @@ public class UseListener implements Listener {
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent e) {
         ItemStack item = e.getItem();
-        if (item != null && item.isSimilar(plugin.nugget)) {
+        if (item != null && item.isSimilar(plugin.getNugget())) {
             e.setUseItemInHand(Event.Result.DENY);
         }
     }

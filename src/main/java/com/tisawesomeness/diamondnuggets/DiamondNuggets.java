@@ -33,11 +33,33 @@ public class DiamondNuggets extends JavaPlugin {
 
     public final NamespacedKey toNuggetKey = new NamespacedKey(this, "nugget");
     public final NamespacedKey toDiamondKey = new NamespacedKey(this, "diamond");
-    public ItemStack nugget = null;
-    public DiamondNuggetsConfig config = null;
+
+    private ItemStack nugget = null;
+    public ItemStack getNugget() {
+        return nugget;
+    }
+
+    private DiamondNuggetsConfig config = null;
+    public DiamondNuggetsConfig getDNConfig() {
+        return config;
+    }
+
+    private SpigotVersion version = null;
+    public SpigotVersion getVersion() {
+        return version;
+    }
 
     @Override
     public void onEnable() {
+
+        String bukkitVersion = getServer().getBukkitVersion();
+        SpigotVersion version = SpigotVersion.findLatestVersion(bukkitVersion);
+        if (version != null) {
+            this.version = version;
+        } else {
+            this.version = SpigotVersion.values()[SpigotVersion.values().length - 1];
+            err("Could not parse version, assuming " + this.version);
+        }
 
         File configFile = new File(getDataFolder(), "config.yml");
         boolean exists = configFile.exists();
@@ -54,21 +76,21 @@ public class DiamondNuggets extends JavaPlugin {
         }
 
         config = new DiamondNuggetsConfig(this);
-        if (!config.isValid()) {
+        if (!getDNConfig().isValid()) {
             err("Config is invalid, exiting...");
             return;
         }
 
-        nugget = Nugget.createNugget(config);
+        nugget = Nugget.createNugget(getDNConfig());
 
         // Don't add recipe if amount of nuggets is invalid
-        if (config.isNuggetsToDiamondValid()) {
-            addToNuggetRecipe(config.nuggetsToDiamond);
-            addToDiamondRecipe(config.nuggetsToDiamond);
+        if (getDNConfig().isNuggetsToDiamondValid()) {
+            addToNuggetRecipe(getDNConfig().nuggetsToDiamond);
+            addToDiamondRecipe(getDNConfig().nuggetsToDiamond);
 
             // In case plugin is reloaded while server is running, give recipes to all online players
             for (Player p : getServer().getOnlinePlayers()) {
-                if (config.unlockOnJoin || shouldUnlockRecipes(p.getInventory())) {
+                if (getDNConfig().unlockOnJoin || shouldUnlockRecipes(p.getInventory())) {
                     unlockRecipes(p);
                 }
             }
@@ -79,7 +101,7 @@ public class DiamondNuggets extends JavaPlugin {
         man.registerEvents(new UseListener(this), this);
         man.registerEvents(new UnlockListener(this), this);
 
-        if (config.preventCrafting) {
+        if (getDNConfig().preventCrafting) {
             man.registerEvents(new CraftListener(this), this);
             man.registerEvents(new InventoryDenyListener(this, InventoryType.STONECUTTER, 0), this);
             man.registerEvents(new InventoryDenyListener(this, InventoryType.CARTOGRAPHY, 0, 1), this);
@@ -88,7 +110,7 @@ public class DiamondNuggets extends JavaPlugin {
             man.registerEvents(new InventoryDenyListener(this, InventoryType.MERCHANT, 0, 1), this);
             man.registerEvents(new BrewListener(this), this);
         }
-        if (config.preventRenames) {
+        if (getDNConfig().preventRenames) {
             man.registerEvents(new InventoryDenyListener(this, InventoryType.ANVIL, true, 0, 1), this);
         }
         man.registerEvents(new InventoryDenyListener(this, InventoryType.GRINDSTONE, 0, 1), this);
@@ -98,7 +120,7 @@ public class DiamondNuggets extends JavaPlugin {
     }
 
     private void generateResourcePack() {
-        if (!config.itemEnchanted && !config.shouldUseCustomModelData()) {
+        if (!getDNConfig().itemEnchanted && !getDNConfig().shouldUseCustomModelData()) {
             // Can't generate a pack using the CIT method if the item has no enchants to separate it from other items
             err("Cannot generate CIT resource pack if item has no enchants.\n" +
                     "Please set `itemEnchanted` to true or use `customModelData`.");
@@ -106,7 +128,7 @@ public class DiamondNuggets extends JavaPlugin {
         }
         try {
             PackCreator packCreator = new PackCreator(this);
-            if (packCreator.createPackIfNeeded(config.itemName, config.itemMaterial)) {
+            if (packCreator.createPackIfNeeded(getDNConfig().itemName, getDNConfig().itemMaterial)) {
                 log("Resource pack created");
             } else {
                 log("Resource pack already exists");
@@ -122,7 +144,7 @@ public class DiamondNuggets extends JavaPlugin {
         // Shapeless recipe doesn't work with nbt :(
         ShapedRecipe toDiamondRecipe = new ShapedRecipe(toDiamondKey, new ItemStack(Material.DIAMOND));
         toDiamondRecipe.shape(getToDiamondRecipeShape(ingredientCount));
-        toDiamondRecipe.setIngredient('#', new RecipeChoice.ExactChoice(nugget));
+        toDiamondRecipe.setIngredient('#', new RecipeChoice.ExactChoice(getNugget()));
         setRecipeBookCategory(toDiamondRecipe);
         getServer().addRecipe(toDiamondRecipe);
     }
@@ -132,7 +154,7 @@ public class DiamondNuggets extends JavaPlugin {
 
     // ingredientCount assumed 1-64
     private void addToNuggetRecipe(int ingredientCount) {
-        ItemStack nuggets = nugget.clone();
+        ItemStack nuggets = getNugget().clone();
         nuggets.setAmount(ingredientCount);
         ShapelessRecipe toNuggetRecipe = new ShapelessRecipe(toNuggetKey, nuggets);
         toNuggetRecipe.addIngredient(1, Material.DIAMOND);
@@ -142,14 +164,14 @@ public class DiamondNuggets extends JavaPlugin {
 
     // Either shaped or shapeless recipe
     private void setRecipeBookCategory(Recipe recipe) {
-        if (!SpigotVersion.SERVER_VERSION.supportsRecipeBookCategory()) {
+        if (!version.supportsRecipeBookCategory()) {
             return;
         }
         try {
             Class<?> categoryClass = Class.forName("org.bukkit.inventory.recipe.CraftingBookCategory");
             Object category = findRecipeBookCategory(categoryClass);
             if (category == null) {
-                err("Could not find recipe book category " + config.recipeBookCategory);
+                err("Could not find recipe book category " + getDNConfig().recipeBookCategory);
                 return;
             }
             // recipe.setCategory(category)
@@ -161,22 +183,19 @@ public class DiamondNuggets extends JavaPlugin {
     private Object findRecipeBookCategory(Class<?> categoryClass) {
         // for (CraftingBookCategory category : CraftingBookCategory.values())
         for (Object category : categoryClass.getEnumConstants()) {
-            if (category.toString().equalsIgnoreCase(config.recipeBookCategory)) {
+            if (category.toString().equalsIgnoreCase(getDNConfig().recipeBookCategory)) {
                 return category;
             }
         }
         return null;
     }
 
-    @Override
-    public void onDisable() {}
-
     /**
      * @param inv The player's inventory
      * @return True if the player has a diamond or diamond nugget and should unlock recipes
      */
     public boolean shouldUnlockRecipes(Inventory inv) {
-        return inv.contains(Material.DIAMOND) || inv.containsAtLeast(nugget, 1);
+        return inv.contains(Material.DIAMOND) || inv.containsAtLeast(getNugget(), 1);
     }
     /**
      * Unlocks the diamond and diamond nugget recipes.

@@ -20,7 +20,7 @@ public class UnlockListener implements Listener {
     // Events cover all detectable cases where an item is added to a player's inventory
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
-        if (plugin.config.unlockOnJoin || plugin.shouldUnlockRecipes(e.getPlayer().getInventory())) {
+        if (plugin.getDNConfig().unlockOnJoin || plugin.shouldUnlockRecipes(e.getPlayer().getInventory())) {
             plugin.unlockRecipes(e.getPlayer());
         }
     }

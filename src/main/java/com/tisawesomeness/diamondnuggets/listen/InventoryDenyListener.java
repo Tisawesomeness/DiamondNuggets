@@ -38,8 +38,8 @@ public class InventoryDenyListener implements Listener {
     public void onInventoryClick(InventoryClickEvent e) {
         if (isTryingToUse(e)) {
             e.setCancelled(true);
-            if (sendMessage && plugin.config.renameDisabledMessage != null) {
-                e.getWhoClicked().sendMessage(ChatColor.RED + plugin.config.renameDisabledMessage);
+            if (sendMessage && plugin.getDNConfig().renameDisabledMessage != null) {
+                e.getWhoClicked().sendMessage(ChatColor.RED + plugin.getDNConfig().renameDisabledMessage);
             }
         }
     }
@@ -49,7 +49,7 @@ public class InventoryDenyListener implements Listener {
             return false;
         }
 
-        if (!plugin.config.preventPlacement) {
+        if (!plugin.getDNConfig().preventPlacement) {
             return e.getSlotType() == InventoryType.SlotType.RESULT && isTryingToClickResult(e);
         }
 
@@ -63,7 +63,7 @@ public class InventoryDenyListener implements Listener {
             placedItem = e.getCurrentItem();
         }
 
-        return placedItem != null && placedItem.isSimilar(plugin.nugget);
+        return placedItem != null && placedItem.isSimilar(plugin.getNugget());
     }
     // returns null if no item was placed
     private ItemStack getPlacedItem(InventoryClickEvent e) {
@@ -82,7 +82,7 @@ public class InventoryDenyListener implements Listener {
         ItemStack placedItem;
         for (int slot : inputSlots) {
             placedItem = e.getInventory().getItem(slot);
-            if (placedItem != null && placedItem.isSimilar(plugin.nugget)) {
+            if (placedItem != null && placedItem.isSimilar(plugin.getNugget())) {
                 return true;
             }
         }

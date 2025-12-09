@@ -54,7 +54,7 @@ public class DiamondNuggetsConfig {
     public static void saveBrandNewConfig(DiamondNuggets plugin) {
         plugin.saveDefaultConfig();
         FileConfiguration conf = plugin.getConfig();
-        if (!SpigotVersion.SERVER_VERSION.supportsCustomModelDataComponent()) {
+        if (!plugin.getVersion().supportsCustomModelDataComponent()) {
             conf.set("custom-model-data", CUSTOM_MODEL_DATA);
         }
         plugin.saveConfig();
@@ -231,7 +231,7 @@ public class DiamondNuggetsConfig {
             }
             return new CustomModelData.Int(asInt);
         } catch (NumberFormatException ignored) {
-            if (!SpigotVersion.SERVER_VERSION.supportsCustomModelDataComponent()) {
+            if (!plugin.getVersion().supportsCustomModelDataComponent()) {
                 plugin.err("custom-model-data must be an integer in server versions before 1.21.4.");
                 return null;
             }
@@ -250,7 +250,7 @@ public class DiamondNuggetsConfig {
         PackFormat packFormat = new PackFormat(major, minor);
         PackFormat cmdExpansionPackFormat = SpigotVersion.V1_21_4.packFormat;
         if (shouldUseCustomModelData() &&
-                SpigotVersion.SERVER_VERSION.supportsCustomModelDataComponent() &&
+                plugin.getVersion().supportsCustomModelDataComponent() &&
                 packFormat.compareTo(cmdExpansionPackFormat) < 0) {
             plugin.err("Resource packs generated in 1.21.4 and later are incompatible with older clients. " +
                     "Setting pack format to " + cmdExpansionPackFormat + ".");

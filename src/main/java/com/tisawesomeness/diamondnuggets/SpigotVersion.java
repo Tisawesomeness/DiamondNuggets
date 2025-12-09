@@ -1,7 +1,5 @@
 package com.tisawesomeness.diamondnuggets;
 
-import org.bukkit.Bukkit;
-
 import java.util.Comparator;
 
 public enum SpigotVersion {
@@ -21,7 +19,8 @@ public enum SpigotVersion {
     V1_21_5("1.21.5", 55),
     V1_21_6("1.21.6", 63),
     V1_21_7("1.21.7", 64),
-    V1_21_9("1.21.9", 69);
+    V1_21_9("1.21.9", 69),
+    V1_21_11("1.21.11", 75);
 
     private final Version version;
     public final PackFormat packFormat;
@@ -35,17 +34,7 @@ public enum SpigotVersion {
         this.packFormat = new PackFormat(packMajor, packMinor);
     }
 
-    public static final SpigotVersion SERVER_VERSION = initVersion();
-
-    private static SpigotVersion initVersion() {
-        String bukkitVersion = Bukkit.getServer().getBukkitVersion();
-        SpigotVersion version = findLatestVersion(bukkitVersion);
-        if (version == null) {
-            throw new IllegalStateException("Unsupported Spigot version: " + bukkitVersion);
-        }
-        return version;
-    }
-    private static SpigotVersion findLatestVersion(String version) {
+    public static SpigotVersion findLatestVersion(String version) {
         int idx = version.indexOf('-');
         if (idx == -1) {
             return null;

@@ -15,7 +15,7 @@ public class BrewListener implements Listener {
 
     @EventHandler
     public void onBrewFuel(BrewingStandFuelEvent e) {
-        if (e.getFuel().isSimilar(plugin.nugget)) {
+        if (e.getFuel().isSimilar(plugin.getNugget())) {
             e.setCancelled(true);
         }
     }

@@ -54,7 +54,7 @@ public class CraftListener implements Listener {
             if (item == null) {
                 continue;
             }
-            if (item.isSimilar(plugin.nugget)) {
+            if (item.isSimilar(plugin.getNugget())) {
                 return true;
             }
         }
@@ -80,11 +80,11 @@ public class CraftListener implements Listener {
 
     private boolean isInvalidNuggetSmith(SmithingInventory inv) {
         ItemStack i1 = inv.getItem(0);
-        if (i1 != null && i1.isSimilar(plugin.nugget)) {
+        if (i1 != null && i1.isSimilar(plugin.getNugget())) {
             return true;
         }
         ItemStack i2 = inv.getItem(1);
-        return i2 != null && i2.isSimilar(plugin.nugget);
+        return i2 != null && i2.isSimilar(plugin.getNugget());
     }
 
 }
