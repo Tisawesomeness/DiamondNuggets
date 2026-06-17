@@ -3,7 +3,7 @@
 # from other plugins, consider using a dedicated custom recipe or custom item plugin.
 
 # The name of the diamond nugget item, must be 1-50 characters
-# & codes supported, see https://minecraft.fandom.com/wiki/Formatting_codes for a list
+# & codes supported, see https://minecraft.wiki/w/Formatting_codes for a list
 # Changing the name will make existing nuggets unable to be combined back into a diamond
 # unless the player renames the nuggets back to the new name
 item-name: "&fDiamond Nugget"
@@ -34,7 +34,7 @@ lore-lines:
 
 # The enchantments of the diamond nugget item, in "enchantment:level" format.
 # Enchantment level must be 1 or higher
-# See https://www.digminecraft.com/lists/enchantment_list_pc.php for a list.
+# See https://hub.spigotmc.org/javadocs/spigot/org/bukkit/enchantments/Enchantment.html for a list.
 # If the resource pack does not use custom model data,
 # the item must have at least one enchantment for the CIT resource pack to work.
 # Changing the enchantments will make existing nuggets unable to be combined back into a diamond.
@@ -108,7 +108,7 @@ custom-model-data: "tis:diamond_nugget"
 
 # The minimum pack format number put in pack.mcmeta when generating the diamond nugget resource pack.
 # Set to -1 to use the pack format number for the **plugin's** current version.
-# See https://minecraft.fandom.com/wiki/Resource_pack#Pack_format
+# See https://minecraft.wiki/w/Pack_format#Resource_pack_format_history
 # If your server allows players to join with older versions, set this to the pack format for the oldest version.
 #
 # Note that if custom model data is enabled, resource packs generated in 1.21.4 and later are incompatible with
