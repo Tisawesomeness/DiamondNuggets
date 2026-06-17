@@ -21,7 +21,8 @@ public enum SpigotVersion {
     V1_21_7("1.21.7", 64),
     V1_21_9("1.21.9", 69),
     V1_21_11("1.21.11", 75),
-    V26_1("26.1", 84);
+    V26_1("26.1", 84),
+    V26_2("26.1", 88);
 
     private final Version version;
     public final PackFormat packFormat;
