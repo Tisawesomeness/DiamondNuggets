@@ -22,7 +22,7 @@ public enum SpigotVersion {
     V1_21_9("1.21.9", 69),
     V1_21_11("1.21.11", 75),
     V26_1("26.1", 84),
-    V26_2("26.1", 88);
+    V26_2("26.2", 88);
 
     private final Version version;
     public final PackFormat packFormat;
@@ -79,8 +79,11 @@ public enum SpigotVersion {
             }
             int major = Integer.parseInt(split[0]);
             int minor = Integer.parseInt(split[1]);
-            int patch = split.length > 2 ? Integer.parseInt(split[2]) : 0;
+            int patch = split.length > 2 && isDigits(split[2]) ? Integer.parseInt(split[2]) : 0;
             return new Version(major, minor, patch);
+        }
+        private static boolean isDigits(String str) {
+            return !str.isEmpty() && str.chars().allMatch(c -> '0' <= c && c <= '9');
         }
 
         @Override
